@@ -34,15 +34,13 @@ export default function Init () {
   return (
     <div className='flex flex-col h-screen bg-gradient-to-b from-sky-400 to-sky-800'>
       <header className='sticky text-white h-12 flex flex-row justify-center items-center bg-white/30 backdrop-blur'>
-        <h1>
-          <Link href='/' className='text-white font-bold text-2xl'>
-            Image to WEBP
-          </Link>
-        </h1>
+        <Link href='/' className='text-white font-bold text-2xl'>
+          Image to WEBP
+        </Link>
       </header>
       <main className='flex-1 h-full flex flex-col items-center justify-center max-w-xl mx-auto w-full gap-1'>
         <h1 className='text-4xl font-bold text-center text-white'>Image to WEBP</h1>
-        <p className='text-center text-gray-100'>Convert your image to webp format</p>
+        <h2 className='text-center text-gray-100'>Convert your image to webp format</h2>
         <section className='flex flex-col gap-2 w-full max-w-xl'>
           <div className='w-full flex flex-row gap-2 flex-0'>
             <div className='w-full h-10 bg-white/20 backdrop-blur shadow-lg rounded-full px-2 py-1 flex flex-row gap-2 items-center'>
