@@ -1,33 +1,69 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import ImageElement from '../components/ImageElement'
 
-export default function Init () {
+export default function Init() {
   const [file, setFile] = useState()
-  const [image, setImage] = useState()
+  const [files, setFiles] = useState([])
   const [loading, setLoading] = useState(false)
   const handleChange = (e) => {
-    setImage()
-    const file = e.target.files[0]
-    setFile(file)
+    const files = Array.from(e.target.files)
+    const allImages = files.every(file => {
+      if (file.type.split('/')[0] !== 'image') {
+        alert('please select image file')
+        return false
+      }
+      return true
+    })
+    if (allImages) {
+      const tempF = []
+      files.forEach(file => {
+        tempF.push({
+          origin: file,
+          toConverted: getImageConverter(file)
+        })
+      })
+      setFile(tempF)
+    }
+    else {
+      setFiles()
+      alert('please select image file')
+    }
   }
 
   const handleConvert = () => {
     setLoading(true)
-    const formData = new FormData()
-    formData.append('image', file)
-    fetch('https://image-converter-k56z.onrender.com/api/image/converter', {
-      method: 'POST',
-      body: formData
-    }).then(res => {
-      if (res.ok) {
-        return res.blob()
-      } else {
-        setFile()
-      }
-    }
-    ).then(blob => {
-      setImage(blob)
+    Promise.all(file.map(item => {
+      return item.toConverted
+    })).then(converted => {
+      setFile(file.map((item, index) => {
+        return {
+          origin: item.origin,
+          converted: converted[index]
+        }
+      }))
       setLoading(false)
+    })
+  }
+
+  const getImageConverter = (file) => {
+    return new Promise((resolve, reject) => {
+      const formData = new FormData()
+      formData.append('image', file)
+      fetch('https://image-converter-k56z.onrender.com/api/image/converter', {
+        method: 'POST',
+        body: formData
+      }).then(res => {
+        if (res.ok) {
+          return res.blob()
+        } else {
+          setFile()
+          reject(res.statusText)
+        }
+      }
+      ).then(blob => {
+        resolve(blob)
+      })
     })
   }
 
@@ -44,31 +80,18 @@ export default function Init () {
         <section className='flex flex-col gap-2 w-full max-w-xl'>
           <div className='w-full flex flex-row gap-2 flex-0'>
             <div className='w-full h-10 bg-white/20 backdrop-blur shadow-lg rounded-full px-2 py-1 flex flex-row gap-2 items-center'>
-              <p className='block w-full text-white italic pl-2 select-none pointer-events-none'>{file?.name || 'Filename'}</p>
+              <p className='block w-full text-white italic pl-2 select-none pointer-events-none'>{file && file[0]?.name || 'Filename'}</p>
             </div>
             <>
               <label htmlFor='input-file' className='h-full'>
                 <div className='px-2 text-nowrap flex items-center bg-cyan-400/20 shadow-lg backdrop-blur hover:brightness-125 transition font-semibold text-white first-letter:uppercase h-full rounded-full' role='button'>Select file</div>
-                <input type='file' id='input-file' onChange={handleChange} className='hidden' />
+                <input type='file' id='input-file' multiple accept='image/jpg, image/png, image/jpeg' onChange={handleChange} className='hidden' />
               </label>
             </>
-            <button disabled={!file || loading} onClick={handleConvert} className='bg-indigo-400/20 shadow-lg transition backdrop-blur disabled:brightness-50 text-white font-semibold hover:brightness-125 capitalize h-full rounded-full px-2'>convert</button>
+            <button disabled={!files || loading} onClick={handleConvert} className='bg-indigo-400/20 shadow-lg transition backdrop-blur disabled:brightness-50 text-white font-semibold hover:brightness-125 capitalize h-full rounded-full px-2'>convert</button>
           </div>
-
-          <div className='min-h-56 h-fit w-full bg-slate-400/20 shadow-lg rounded-lg backdrop-blur p-4 flex justify-between'>
-            <div className='flex flex-col items-center'>
-              <p className='text-white font-semibold'>Original</p>
-              {file && <img src={file && URL.createObjectURL(file)} alt={file?.name} className='h-full transition max-w-24 object-contain hover:cursor-pointer hover:brightness-125' onClick={() => { window.open(URL.createObjectURL(file), '_blank') }} />}
-              {file && <p className='text-white'>{getSize(file.size)}</p>}
-            </div>
-            <div className='flex flex-col items-center gap-0'>
-              <p className='text-white font-semibold'>Converted</p>
-              {loading && <div role='img' className='bg-slate-400  h-full w-32 animate-pulse flex flex-row items-center justify-center'>Loading</div>}
-              {(!loading && image) && <img src={image && URL.createObjectURL(image)} alt={image?.name} className='transition h-full max-w-24 object-contain hover:cursor-pointer hover:brightness-125' onClick={() => { window.open(URL.createObjectURL(image), '_blank') }} />}
-              {!loading && !image && <p className='text-white'>no image</p>}
-              {(!loading && image) && <p className='text-white'>{getSize(image.size)}</p>}
-              {(!loading && image) && <a href={URL.createObjectURL(image)} target='_blank' download={image.name} className='bg-cyan-400/20 shadow-lg transition backdrop-blur disabled:brightness-50 text-white font-semibold hover:brightness-125 capitalize rounded-full px-2'>download</a>}
-            </div>
+          <div className='min-h-56 max-h-56 h-fit w-full bg-slate-400/20 shadow-lg rounded-lg backdrop-blur flex flex-col overflow-y-scroll gap-2'>
+            {file && file.map((item) => <ImageElement key={item.origin.name} origin={item.origin} converted={item.converted} loading={loading} />)}
           </div>
         </section>
       </main>
@@ -79,13 +102,4 @@ export default function Init () {
       </footer>
     </div>
   )
-}
-
-const getSize = (size) => {
-  const kb = size / 1024
-  const mb = kb / 1024
-  if (mb > 0.9) {
-    return mb.toFixed(2) + ' MB'
-  }
-  return kb.toFixed(2) + ' KB'
 }
