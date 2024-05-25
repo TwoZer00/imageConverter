@@ -1,6 +1,6 @@
 import { PropTypes } from 'prop-types'
 import { useState } from 'react'
-import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton } from '@mui/material'
+import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha } from '@mui/material'
 import { Close, Delete } from '@mui/icons-material'
 
 export default function Main () {
@@ -21,6 +21,7 @@ export default function Main () {
 
 const InputFile = ({ files }) => {
   const [data, setData] = files
+  const theme = useTheme()
   const handleChange = (e) => {
     const InputFiles = Array.from(e.target.files)
     const temp = [...data, ...InputFiles]
@@ -31,7 +32,7 @@ const InputFile = ({ files }) => {
     setData(temp)
   }
   return (
-    <Box mx='auto' width='fit-content'>
+    <Box sx={{ py: 1, position: 'fixed', backgroundColor: `${alpha(theme.palette.background.default, 0.1)}`, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderRadius: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0 }}>
       <Stack direction='row' gap={1}>
         <input type='file' multiple hidden id='input-file' onChange={handleChange} />
         <Stack component='label' htmlFor='input-file'>
@@ -46,7 +47,7 @@ const InputFile = ({ files }) => {
           Convert all
         </Button>
       </Stack>
-      <Typography variant='caption' align='center' display='block' sx={{ ':first-letter': { textTransform: 'uppercase' } }}>max 5 files at same time.</Typography>
+      <Typography variant='caption' align='center' mt={1} display='block' sx={{ ':first-letter': { textTransform: 'uppercase' } }}>max 5 files at same time.</Typography>
     </Box>
   )
 }
@@ -57,7 +58,7 @@ const FileList = ({ files }) => {
     setData([...data])
   }
   return (
-    <Box height='100%' flex='auto' width='100%' maxWidth='md' mx='auto'>
+    <Box height='100%' flex='auto' width='100%' maxWidth='md' mx='auto' mt={9}>
       <Stack direction='column' overflow='auto'>
         {data.map((file, index) => (
           <Stack direction='column' key={index} flex={1} width='200px'>
