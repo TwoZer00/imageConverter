@@ -1,6 +1,6 @@
 import { PropTypes } from 'prop-types'
 import { useRef, useState } from 'react'
-import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Tooltip, Chip, TextField, InputAdornment } from '@mui/material'
+import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment } from '@mui/material'
 import Masonry from '@mui/lab/Masonry'
 import { Close, Delete, Download } from '@mui/icons-material'
 const API_URL = 'https://image-converter-k56z.onrender.com/api/image/converter'
