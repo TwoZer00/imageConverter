@@ -1,8 +1,8 @@
 import { PropTypes } from 'prop-types'
 import { useRef, useState } from 'react'
-import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Tooltip, Chip } from '@mui/material'
+import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Tooltip, Chip, TextField, InputAdornment } from '@mui/material'
 import Masonry from '@mui/lab/Masonry'
-import { Delete, Download } from '@mui/icons-material'
+import { Close, Delete, Download } from '@mui/icons-material'
 const API_URL = 'https://image-converter-k56z.onrender.com/api/image/converter'
 export default function Main () {
   const theme = createTheme()
@@ -42,6 +42,41 @@ export default function Main () {
           <FileList files={[files, setFiles]} />
         </Stack>
       </ThemeProvider>
+    </>
+  )
+}
+
+const InputFilename = ({ file, index }) => {
+  const [data, setFiles] = file
+  const inputRef = useRef(null)
+  const [props, setProps] = useState({
+    readOnly: true,
+    endAdornment:
+  <InputAdornment position='end'>
+    <IconButton
+      size='small' onClick={() => {
+        inputRef.current.value = ''
+        setFiles((val) => {
+          const temp = [...val]
+          delete temp[index].newName
+          return temp
+        })
+      }}
+    >
+      <Close />
+    </IconButton>
+  </InputAdornment>
+  })
+  const handleChange = (e) => {
+    setFiles((val) => {
+      const temp = [...val]
+      temp[index].newName = e.target.value
+      return temp
+    })
+  }
+  return (
+    <>
+      <TextField InputProps={props} inputProps={{ ref: inputRef, autocomplete: 'off' }} onClick={(e) => { e.target.disabled = false }} defaultValue={data.newName} placeholder={data.name} onChange={handleChange} variant='standard' fullWidth onBlur={() => setProps({ ...props, readOnly: true })} onFocus={() => setProps({ ...props, readOnly: false })} />
     </>
   )
 }
@@ -101,9 +136,7 @@ const FileList = ({ files }) => {
         {data.map((file, index) => (
           <Box key={index} width='200px' border={1} p={2} boxSizing='content-box' borderRadius={2} borderColor={theme.palette.divider}>
             <Stack direction='row' alignItems='center'>
-              <Tooltip title={file.name}>
-                <Typography variant='body1' maxWidth='100%' flex={1} noWrap>{file.name || 'no filename'}</Typography>
-              </Tooltip>
+              <InputFilename file={[file, setData]} index={index} placeholder={file.name || 'no filename'} />
             </Stack>
             <Box position='relative'>
               <img src={URL.createObjectURL(file.fileconverted || file)} alt={file.name} style={{ height: 'auto', width: '100%', objectFit: 'contain' }} />
@@ -111,7 +144,7 @@ const FileList = ({ files }) => {
             </Box>
             <Typography variant='caption' textAlign='center' display='block'>{getSize(file.size)}</Typography>
             <Stack direction='row' justifyContent='flex-end' alignItems='center'>
-              <IconButton disabled={!file.downloable} size='small' component='a' href={file.fileconverted && URL.createObjectURL(file.fileconverted)} download>
+              <IconButton disabled={!file.downloable} size='small' component='a' href={file.fileconverted && URL.createObjectURL(file.fileconverted)} download={file.newName?.replace(' ', '-') || true}>
                 <Download />
               </IconButton>
               <IconButton size='small' onClick={() => handleClick(index)}>
@@ -131,6 +164,10 @@ InputFile.propTypes = {
 }
 FileList.propTypes = {
   files: PropTypes.array.isRequired
+}
+InputFilename.propTypes = {
+  file: PropTypes.array.isRequired,
+  index: PropTypes.number.isRequired
 }
 const getSize = (size) => {
   const kb = size / 1024
