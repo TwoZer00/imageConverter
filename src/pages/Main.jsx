@@ -58,7 +58,7 @@ export default function Main () {
     </>
   )
 }
-
+// TODO let image when are converted, an be possible to see more than 5 images in view
 const InputFilename = ({ file, index }) => {
   const [data, setFiles] = file
   const inputRef = useRef(null)
@@ -145,8 +145,8 @@ const InputFile = ({ files, converter }) => {
     fileInputRef.current.value = ''
   }
   return (
-    <Box sx={{ py: 2, position: 'fixed', backgroundColor: `${alpha(theme.palette.background.default, 0.25)}`, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0 }}>
-      <Stack direction='row' gap={1}>
+    <Box sx={{ py: 2, position: 'sticky', backgroundColor: `${alpha(theme.palette.background.default, 0.25)}`, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0 }}>
+      <Stack direction='row' gap={1} flexWrap='wrap' justifyContent='space-around'>
         <input accept='image/png,image/jpg,image/jpeg' type='file' multiple hidden id='input-file' onChange={handleChange} ref={fileInputRef} />
         <Stack component='label' htmlFor='input-file'>
           <Button startIcon={<Upload />} variant='contained' sx={{ textWrap: 'nowrap', width: 'fit-content' }} component='span' role='button'>
@@ -158,7 +158,7 @@ const InputFile = ({ files, converter }) => {
         >
           Clear all
         </Button>
-        <Button startIcon={<Compare />} variant='contained' sx={{ width: 'fit-content' }} disabled={data.length === 0} onClick={() => { converter() }}>
+        <Button startIcon={<Compare />} variant='contained' sx={{ width: 'fit-content', textWrap: 'nowrap' }} disabled={data.length === 0} onClick={() => { converter() }}>
           Convert {data.length > 1 && 'all'}
         </Button>
       </Stack>
@@ -174,7 +174,7 @@ const FileList = ({ files }) => {
     setData([...data])
   }
   return (
-    <Box height='100%' flex='auto' width='100%' overflow='auto' pt={9} pb={1}>
+    <Box height='100%' flex='auto' width='100%' overflow='auto'>
       <Box mt={0.6} mb={2} position='sticky' sx={{ top: 5, zIndex: 1 }}>
         {loading && <LinearProgress sx={{ width: '100%' }} />}
       </Box>
