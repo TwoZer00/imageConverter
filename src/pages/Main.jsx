@@ -51,8 +51,16 @@ export default function Main () {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Stack maxWidth='100dvw' height='100dvh'>
-          <InputFile files={[files, setFiles]} converter={convert} loading={files.some(item => item.loading)} />
-          <FileList files={[files, setFiles]} />
+          <Stack component='header' direction='column' alignItems='center' mt={1}>
+            <Typography variant='h1' fontSize={32} fontWeight={400} textTransform='uppercase'>Image converter</Typography>
+            <Typography variant='subtitle1' fontSize={12}>Convert images(png, jpeg, jpg) to webm</Typography>
+          </Stack>
+          <Box component='main'>
+            <Box sx={{ position: 'sticky', backgroundColor: `${alpha(theme.palette.background.default, 0.25)}`, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0 }}>
+              <InputFile files={[files, setFiles]} converter={convert} loading={files.some(item => item.loading)} />
+            </Box>
+            <FileList files={[files, setFiles]} />
+          </Box>
         </Stack>
       </ThemeProvider>
     </>
@@ -122,7 +130,6 @@ const CloseCustomButton = (props) => {
 }
 const InputFile = ({ files, converter }) => {
   const [data, setData] = files
-  const theme = useTheme()
   const fileInputRef = useRef(null)
   const loading = data.some(item => item.loading)
   const handleChange = (e) => {
@@ -145,24 +152,24 @@ const InputFile = ({ files, converter }) => {
     }
   }
   return (
-    <Box sx={{ pb: 2, position: 'sticky', backgroundColor: `${alpha(theme.palette.background.default, 0.25)}`, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0 }}>
-      <LinearProgress sx={{ width: '100%', mb: 2, visibility: `${!loading && 'hidden'}` }} />
-      <Stack direction='row' gap={1} flexWrap='wrap' justifyContent='space-around'>
+    <Box width='100%'>
+      <Stack mx='auto' my={1} width='fit-content' direction='row' gap={1} flexWrap='wrap' justifyContent='space-around'>
         <input accept='image/png,image/jpg,image/jpeg' type='file' multiple hidden id='input-file' onChange={handleChange} ref={fileInputRef} />
-        <Stack component='label' htmlFor='input-file'>
-          <Button startIcon={<Upload />} variant='contained' sx={{ textWrap: 'nowrap', width: 'fit-content' }} component='span' role='button'>
-            Load Files
-          </Button>
-        </Stack>
         <Button
           disabled={data.length === 0} variant='contained' color='error' sx={{ textWrap: 'nowrap', width: 'fit-content', height: 'fit-content' }} startIcon={<Delete />} onClick={handleClear}
         >
           Clear all
         </Button>
+        <Stack component='label' htmlFor='input-file'>
+          <Button startIcon={<Upload />} variant='contained' sx={{ textWrap: 'nowrap', width: 'fit-content' }} component='span' role='button'>
+            Load Files
+          </Button>
+        </Stack>
         <Button startIcon={<Compare />} variant='contained' sx={{ width: 'fit-content', textWrap: 'nowrap' }} disabled={data.length === 0 || loading} onClick={() => { converter() }}>
           Convert {data.length > 1 && 'all'}
         </Button>
       </Stack>
+      <LinearProgress sx={{ width: '100%', visibility: `${!loading && 'hidden'}` }} />
     </Box>
   )
 }
@@ -174,7 +181,7 @@ const FileList = ({ files }) => {
     setData([...data])
   }
   return (
-    <Box height='100%' flex='auto' width='100%' overflow='auto'>
+    <Box height='100%' flex='auto' width='100%' mt={2}>
       <Masonry columns={2} spacing={4} sx={{ maxWidth: 'xl', width: '100%', mx: 'auto', p: 1 }}>
         {data.map((file, index) => (
           <Box key={index} width='200px' border={1} p={2} boxSizing='content-box' borderRadius={2} borderColor={theme.palette.divider}>
