@@ -83,7 +83,7 @@ const InputFilename = ({ file, index }) => {
     <>
       <TextField
         fullWidth
-        sx={{ '& .MuiInput-root:before': { border: 'none' }, '& .MuiInput-root:hover:before': { border: 'none' }, '& .MuiInputBase-root:hover:before': { border: 'none' } }}
+        sx={{ '& .MuiInput-root:hover:not(.Mui-disabled, .Mui-error):before': { border: 'none' }, '& .MuiInput-root:before': { border: 'none' } }}
         InputProps={props}
         inputProps={{ ref: inputRef, autoComplete: 'off' }}
         defaultValue={data.newName}
