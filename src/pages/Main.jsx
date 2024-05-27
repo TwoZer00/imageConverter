@@ -140,8 +140,10 @@ const InputFile = ({ files, converter }) => {
     setData(temp)
   }
   const handleClear = () => {
-    setData([])
-    fileInputRef.current.value = ''
+    if (window.confirm('Are you sure to clear all files?')) {
+      setData([])
+      fileInputRef.current.value = ''
+    }
   }
   return (
     <Box sx={{ py: 2, position: 'sticky', backgroundColor: `${alpha(theme.palette.background.default, 0.25)}`, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0 }}>
@@ -153,7 +155,7 @@ const InputFile = ({ files, converter }) => {
           </Button>
         </Stack>
         <Button
-          disabled={data.length === 0} variant='contained' sx={{ textWrap: 'nowrap', width: 'fit-content', height: 'fit-content' }} startIcon={<Delete />} onClick={handleClear}
+          disabled={data.length === 0} variant='contained' color='error' sx={{ textWrap: 'nowrap', width: 'fit-content', height: 'fit-content' }} startIcon={<Delete />} onClick={handleClear}
         >
           Clear all
         </Button>
