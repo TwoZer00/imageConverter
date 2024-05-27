@@ -58,7 +58,6 @@ export default function Main () {
     </>
   )
 }
-// TODO let image when are converted, an be possible to see more than 5 images in view
 const InputFilename = ({ file, index }) => {
   const [data, setFiles] = file
   const inputRef = useRef(null)
@@ -130,8 +129,8 @@ const InputFile = ({ files, converter }) => {
   const handleChange = (e) => {
     const InputFiles = Array.from(e.target.files)
     const temp = [...data, ...InputFiles]
-    if (temp.length > 5) {
-      setData(temp.slice(0, 5))
+    if (temp.filter(item => !item.fileconverted).length > 5) {
+      setData([...temp.filter(item => item.fileconverted), ...temp.filter(item => !item.fileconverted).slice(0, 5)])
       return alert('max 5 file at same time')
     }
     if (temp.some(item => getSizeNumber(item.size) >= 5)) {
@@ -228,7 +227,6 @@ const getSize = (size) => {
   const mb = kb / 1024
   return (mb > 1) ? `${mb.toFixed(2)} Mb` : `${kb.toFixed(2)} Kb`
 }
-
 const getSizeNumber = (size) => {
   const kb = size / 1024
   const mb = kb / 1024
