@@ -102,7 +102,6 @@ const InputFilename = ({ file, index }) => {
     </>
   )
 }
-
 const CloseCustomButton = (props) => {
   return (
     <InputAdornment position='end'>
@@ -121,11 +120,11 @@ const CloseCustomButton = (props) => {
     </InputAdornment>
   )
 }
-
 const InputFile = ({ files, converter }) => {
   const [data, setData] = files
   const theme = useTheme()
   const fileInputRef = useRef(null)
+  const loading = data.some(item => item.loading)
   const handleChange = (e) => {
     const InputFiles = Array.from(e.target.files)
     const temp = [...data, ...InputFiles]
@@ -146,7 +145,8 @@ const InputFile = ({ files, converter }) => {
     }
   }
   return (
-    <Box sx={{ py: 2, position: 'sticky', backgroundColor: `${alpha(theme.palette.background.default, 0.25)}`, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0 }}>
+    <Box sx={{ pb: 2, position: 'sticky', backgroundColor: `${alpha(theme.palette.background.default, 0.25)}`, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0 }}>
+      <LinearProgress sx={{ width: '100%', mb: 2, visibility: `${!loading && 'hidden'}` }} />
       <Stack direction='row' gap={1} flexWrap='wrap' justifyContent='space-around'>
         <input accept='image/png,image/jpg,image/jpeg' type='file' multiple hidden id='input-file' onChange={handleChange} ref={fileInputRef} />
         <Stack component='label' htmlFor='input-file'>
@@ -159,7 +159,7 @@ const InputFile = ({ files, converter }) => {
         >
           Clear all
         </Button>
-        <Button startIcon={<Compare />} variant='contained' sx={{ width: 'fit-content', textWrap: 'nowrap' }} disabled={data.length === 0} onClick={() => { converter() }}>
+        <Button startIcon={<Compare />} variant='contained' sx={{ width: 'fit-content', textWrap: 'nowrap' }} disabled={data.length === 0 || loading} onClick={() => { converter() }}>
           Convert {data.length > 1 && 'all'}
         </Button>
       </Stack>
@@ -169,16 +169,12 @@ const InputFile = ({ files, converter }) => {
 const FileList = ({ files }) => {
   const theme = useTheme()
   const [data, setData] = files
-  const loading = data.some(item => item.loading)
   const handleClick = (index) => {
     data.splice(index, 1)
     setData([...data])
   }
   return (
     <Box height='100%' flex='auto' width='100%' overflow='auto'>
-      <Box mt={0.6} mb={2} position='sticky' sx={{ top: 5, zIndex: 1 }}>
-        {loading && <LinearProgress sx={{ width: '100%' }} />}
-      </Box>
       <Masonry columns={2} spacing={4} sx={{ maxWidth: 'xl', width: '100%', mx: 'auto', p: 1 }}>
         {data.map((file, index) => (
           <Box key={index} width='200px' border={1} p={2} boxSizing='content-box' borderRadius={2} borderColor={theme.palette.divider}>
