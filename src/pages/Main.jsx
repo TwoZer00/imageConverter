@@ -1,9 +1,10 @@
 import { PropTypes } from 'prop-types'
-import { useRef, useState } from 'react'
-import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip } from '@mui/material'
+import { useEffect, useRef, useState } from 'react'
+import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip, Badge } from '@mui/material'
 import Masonry from '@mui/lab/Masonry'
-import { Close, Compare, Delete, Download, Upload } from '@mui/icons-material'
-const API_URL = 'https://image-converter-k56z.onrender.com/api/image/converter'
+import { Autorenew, AutorenewOutlined, Close, Cloud, CloudOff, CloudOffOutlined, CloudOutlined, CloudSyncOutlined, Compare, Delete, Download, Pending, Upload } from '@mui/icons-material'
+const API_URL_BASE = 'https://image-converter-k56z.onrender.com'
+const API_URL = `${API_URL_BASE}/api/image/converter`
 export default function Main () {
   const theme = createTheme()
   const [files, setFiles] = useState([])
@@ -25,6 +26,7 @@ export default function Main () {
         if (res.status !== 200) {
           throw new Error((await res.json()).message)
         }
+        localStorage.setItem('waker', Date.now())
         return res.blob()
       }).then((blob) => {
         item.fileconverted = blob // save blob to item
@@ -46,6 +48,7 @@ export default function Main () {
       })
     })
   }
+
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -155,6 +158,7 @@ const InputFile = ({ files, converter }) => {
     <Box width='100%'>
       <Stack mx='auto' my={1} width='fit-content' direction='row' gap={1} flexWrap='wrap' justifyContent='space-around'>
         <input accept='image/png,image/jpg,image/jpeg' type='file' multiple hidden id='input-file' onChange={handleChange} ref={fileInputRef} />
+        <ApiStatusText />
         <Button
           disabled={data.length === 0} variant='contained' color='error' sx={{ textWrap: 'nowrap', width: 'fit-content', height: 'fit-content' }} startIcon={<Delete />} onClick={handleClear}
         >
@@ -236,4 +240,81 @@ const getSizeNumber = (size) => {
   const kb = size / 1024
   const mb = kb / 1024
   return mb.toFixed(2)
+}
+const appAPIStatus = (isTemp = false) => {
+  const options = {
+    method: 'HEAD',
+    mode: 'no-cors'
+  }
+  if (isTemp) options.signal = AbortSignal.timeout(2000)
+  if (!document.hasFocus()) {
+    throw new Error('no focus')
+  }
+  return fetch(API_URL_BASE, options)
+}
+const ApiStatusText = () => {
+  const [apiStatus, setApiStatus] = useState('checking')
+  const apiStatusRef = useRef('initiating')
+  useEffect(() => {
+    if (apiStatusRef.current === 'initiating') {
+      APIServiceWaker(setApiStatus)
+      apiStatusRef.current = 'done'
+    }
+  }, [])
+  return (
+    <>
+      <Box px='.75rem' py='.30rem' sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, width: 'fit-content' }}>
+        <Badge color={apiStatus === 'up' ? 'success' : apiStatus === 'down' ? 'error' : 'warning'} variant='dot'>
+          <IconStatusApi status={apiStatus} />
+        </Badge>
+      </Box>
+    </>
+  )
+}
+
+const IconStatusApi = ({ status }) => {
+  switch (status) {
+    case 'up':
+      return (
+        <CloudOutlined />
+      )
+    case 'down':
+      return <CloudOffOutlined />
+    default:
+      return (
+        <CloudSyncOutlined />
+      )
+  }
+}
+
+IconStatusApi.propTypes = {
+  status: PropTypes.string.isRequired
+}
+
+const APIServiceWaker = (setVal) => {
+  setVal('checking')
+  wakerF(setVal)
+  console.info(new Date(parseInt(localStorage.getItem('waker'))).toLocaleString(), 'last waker record')
+  setInterval(() => {
+    wakerF(setVal)
+  }, 15000)
+}
+
+const wakerF = (setVal) => {
+  if (Date.now() - parseInt(localStorage.getItem('waker')) > 600000 || localStorage.getItem('waker') === null) {
+    try {
+      appAPIStatus().then(() => {
+        setVal('up')
+        localStorage.setItem('waker', Date.now())
+      })
+        .catch((error) => {
+          setVal('down')
+          console.error(error)
+        })
+    } catch (error) {
+      if (error.name === 'no focus') setVal('checking')
+    }
+  } else {
+    setVal('up')
+  }
 }

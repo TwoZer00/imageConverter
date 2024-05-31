@@ -1,10 +1,10 @@
-import Main from "./pages/Main";
+import Main from './pages/Main'
 
 const router = [
-    {
-        path:'',
-        element:<Main/>
-    }
+  {
+    path: '',
+    element: <Main />
+  }
 ]
 
-export {router as Routes};
+export { router as Routes }
