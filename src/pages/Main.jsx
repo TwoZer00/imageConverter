@@ -231,7 +231,7 @@ const InputFile = ({ files, converter }) => {
         <Button disableElevation startIcon={<Compare />} variant='contained' sx={{ width: 'fit-content', textWrap: 'nowrap' }} disabled={(data.filter(item => !item.fileconverted)).length === 0 || loading} onClick={() => { converter() }}>
           Convert {(data.filter(item => !item.fileconverted)).length > 1 && 'all'}
         </Button>
-        <ApiStatusText />
+        {/* <ApiStatusText /> */}
       </Stack>
       <LinearProgress sx={{ width: '100%', visibility: `${!loading && 'hidden'}` }} />
     </Box>
@@ -308,9 +308,10 @@ const appAPIStatus = (isTemp = false) => {
   }
   if (isTemp) options.signal = AbortSignal.timeout(2000)
   if (!document.hasFocus()) throw new Error('no focus')
-  if (!isConverting() && !document.hasFocus()) throw new Error('no converting')
+  if (isConverting()) throw new Error('no converting')
   return fetch(API_URL_BASE, options)
 }
+// eslint-disable-next-line no-unused-vars
 const ApiStatusText = () => {
   const [apiStatus, setApiStatus] = useState('checking')
   const apiStatusRef = useRef('initiating')
@@ -360,7 +361,7 @@ const APIServiceWaker = (setVal) => {
   wakerF(setVal)
   setInterval(() => {
     wakerF(setVal)
-  }, 15000)
+  }, 7500)
 }
 
 const wakerF = (setVal) => {
@@ -377,6 +378,7 @@ const wakerF = (setVal) => {
           localStorage.removeItem('waker')
         })
     } catch (error) {
+      // console.error(error)
       if (error.message === 'no focus' || error.message === 'no converting') {
         setVal('checking')
       }
@@ -391,5 +393,6 @@ const wakerF = (setVal) => {
 }
 /** Flag to avoid keep waking api */
 const isConverting = () => {
-  return (sessionStorage.getItem('convertion') !== null && Date.now() - parseInt(sessionStorage.getItem('convertion')) > 600000)
+  if (sessionStorage.getItem('convertion') === null) return true
+  return (Date.now() - parseInt(sessionStorage.getItem('convertion')) > 600000)
 }
