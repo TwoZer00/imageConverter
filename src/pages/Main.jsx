@@ -1,8 +1,8 @@
 import { PropTypes } from 'prop-types'
 import { useEffect, useRef, useState } from 'react'
-import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip, Badge } from '@mui/material'
+import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip } from '@mui/material'
 import Masonry from '@mui/lab/Masonry'
-import { Autorenew, AutorenewOutlined, Close, Cloud, CloudOff, CloudOffOutlined, CloudOutlined, CloudSyncOutlined, Compare, Delete, Download, Pending, Upload } from '@mui/icons-material'
+import { Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, Upload } from '@mui/icons-material'
 const API_URL_BASE = 'https://image-converter-k56z.onrender.com'
 const API_URL = `${API_URL_BASE}/api/image/converter`
 export default function Main () {
@@ -26,7 +26,7 @@ export default function Main () {
         if (res.status !== 200) {
           throw new Error((await res.json()).message)
         }
-        localStorage.setItem('waker', Date.now())
+        sessionStorage.setItem('convertion', Date.now())
         return res.blob()
       }).then((blob) => {
         item.fileconverted = blob // save blob to item
@@ -48,7 +48,6 @@ export default function Main () {
       })
     })
   }
-
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -158,7 +157,6 @@ const InputFile = ({ files, converter }) => {
     <Box width='100%'>
       <Stack mx='auto' my={1} width='fit-content' direction='row' gap={1} flexWrap='wrap' justifyContent='space-around'>
         <input accept='image/png,image/jpg,image/jpeg' type='file' multiple hidden id='input-file' onChange={handleChange} ref={fileInputRef} />
-        <ApiStatusText />
         <Button
           disabled={data.length === 0} variant='contained' color='error' sx={{ textWrap: 'nowrap', width: 'fit-content', height: 'fit-content' }} startIcon={<Delete />} onClick={handleClear}
         >
@@ -172,6 +170,7 @@ const InputFile = ({ files, converter }) => {
         <Button startIcon={<Compare />} variant='contained' sx={{ width: 'fit-content', textWrap: 'nowrap' }} disabled={data.length === 0 || loading} onClick={() => { converter() }}>
           Convert {data.length > 1 && 'all'}
         </Button>
+        <ApiStatusText />
       </Stack>
       <LinearProgress sx={{ width: '100%', visibility: `${!loading && 'hidden'}` }} />
     </Box>
@@ -247,9 +246,8 @@ const appAPIStatus = (isTemp = false) => {
     mode: 'no-cors'
   }
   if (isTemp) options.signal = AbortSignal.timeout(2000)
-  if (!document.hasFocus()) {
-    throw new Error('no focus')
-  }
+  if (!document.hasFocus()) throw new Error('no focus')
+  if (isConverting()) throw new Error('no converting')
   return fetch(API_URL_BASE, options)
 }
 const ApiStatusText = () => {
@@ -263,58 +261,75 @@ const ApiStatusText = () => {
   }, [])
   return (
     <>
-      <Box px='.75rem' py='.30rem' sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, width: 'fit-content' }}>
-        <Badge color={apiStatus === 'up' ? 'success' : apiStatus === 'down' ? 'error' : 'warning'} variant='dot'>
-          <IconStatusApi status={apiStatus} />
-        </Badge>
+      <Box px='.75rem' py='.30rem' sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2, width: 'fit-content', mx: 'auto' }}>
+        <Stack direction='row' gap={1} alignItems='center'>
+          <Tooltip title={apiStatus === 'up' ? 'service is running' : apiStatus === 'down' ? 'service is down' : 'service is loading'}>
+            <IconButton sx={{ p: 0 }}>
+              <IconStatusApi status={apiStatus} />
+            </IconButton>
+          </Tooltip>
+        </Stack>
       </Box>
     </>
   )
 }
 
-const IconStatusApi = ({ status }) => {
+const IconStatusApi = ({ status, ...props }) => {
   switch (status) {
     case 'up':
       return (
-        <CloudOutlined />
+        <CloudDoneOutlined {...props} />
       )
     case 'down':
-      return <CloudOffOutlined />
+      return <CloudOffOutlined {...props} />
     default:
       return (
-        <CloudSyncOutlined />
+        <CloudSyncOutlined {...props} />
       )
   }
 }
 
 IconStatusApi.propTypes = {
-  status: PropTypes.string.isRequired
+  status: PropTypes.string.isRequired,
+  fontSize: PropTypes.string
 }
 
 const APIServiceWaker = (setVal) => {
   setVal('checking')
-  wakerF(setVal)
-  console.info(new Date(parseInt(localStorage.getItem('waker'))).toLocaleString(), 'last waker record')
+  if (!(Date.now() - parseInt(localStorage.getItem('waker')) > 360000)) {
+    if (localStorage.getItem('waker') !== null) setVal('up')
+  }
   setInterval(() => {
     wakerF(setVal)
   }, 15000)
 }
 
 const wakerF = (setVal) => {
-  if (Date.now() - parseInt(localStorage.getItem('waker')) > 600000 || localStorage.getItem('waker') === null) {
+  if (Date.now() - parseInt(localStorage.getItem('waker')) > 300000 || localStorage.getItem('waker') === null) {
     try {
+      console.log('waking api')
       appAPIStatus().then(() => {
         setVal('up')
         localStorage.setItem('waker', Date.now())
       })
         .catch((error) => {
-          setVal('down')
           console.error(error)
+          setVal('down')
         })
     } catch (error) {
-      if (error.name === 'no focus') setVal('checking')
+      if (error.message === 'no focus' || error.message === 'no converting') {
+        setVal('checking')
+      }
+      localStorage.removeItem('waker')
     }
   } else {
-    setVal('up')
+    setVal((val) => {
+      if (val !== 'up') return 'up'
+      return val
+    })
   }
+}
+/** Flag to avoid keep waking api */
+const isConverting = () => {
+  return (sessionStorage.getItem('convertion') !== null && Date.now() - parseInt(sessionStorage.getItem('convertion')) > 600000)
 }
