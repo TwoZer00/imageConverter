@@ -2,7 +2,7 @@ import { PropTypes } from 'prop-types'
 import { useEffect, useRef, useState } from 'react'
 import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip, Menu, MenuItem, ListItemIcon } from '@mui/material'
 import Masonry from '@mui/lab/Masonry'
-import { Checklist, ChecklistRtl, ClearAll, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, KeyboardArrowDown, MoreVert, Rule, Upload } from '@mui/icons-material'
+import { ChecklistRtl, Clear, ClearAll, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Download, MoreVert, Rule, Upload } from '@mui/icons-material'
 const API_URL_BASE = 'https://image-converter-k56z.onrender.com'
 const API_URL = `${API_URL_BASE}/api/image/converter`
 export default function Main () {
@@ -260,11 +260,11 @@ const FileList = ({ files }) => {
               <Typography variant='caption' color={`${getSizeNumber(file.size) > 5 ? 'crimson' : 'inherit'}`} textAlign='center' display='block'>{getSize(file.size)}</Typography>
             </Tooltip>
             <Stack direction='row' justifyContent='flex-end' alignItems='center'>
-              <IconButton disabled={!file.downloable} size='small' component='a' href={file.fileconverted && URL.createObjectURL(file.fileconverted)} download={file.newName?.replace(' ', '-') || true}>
+              <IconButton disabled={!file.downloable} component='a' href={file.fileconverted && URL.createObjectURL(file.fileconverted)} download={file.newName?.replace(' ', '-') || true}>
                 <Download />
               </IconButton>
-              <IconButton size='small' onClick={() => handleClick(index)}>
-                <Delete />
+              <IconButton onClick={() => handleClick(index)}>
+                <Clear />
               </IconButton>
             </Stack>
             {file.error && <Typography variant='subtitle1' color='crimson' textAlign='center' display='block'>{file.error}</Typography>}
@@ -308,7 +308,7 @@ const appAPIStatus = (isTemp = false) => {
   }
   if (isTemp) options.signal = AbortSignal.timeout(2000)
   if (!document.hasFocus()) throw new Error('no focus')
-  if (isConverting()) throw new Error('no converting')
+  if (!isConverting() && !document.hasFocus()) throw new Error('no converting')
   return fetch(API_URL_BASE, options)
 }
 const ApiStatusText = () => {
