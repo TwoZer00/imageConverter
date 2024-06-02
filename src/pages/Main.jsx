@@ -1,8 +1,8 @@
 import { PropTypes } from 'prop-types'
 import { useEffect, useRef, useState } from 'react'
-import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip } from '@mui/material'
+import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip, Menu, MenuItem, ListItemIcon } from '@mui/material'
 import Masonry from '@mui/lab/Masonry'
-import { Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, Upload } from '@mui/icons-material'
+import { Checklist, ChecklistRtl, ClearAll, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, KeyboardArrowDown, MoreVert, Rule, Upload } from '@mui/icons-material'
 const API_URL_BASE = 'https://image-converter-k56z.onrender.com'
 const API_URL = `${API_URL_BASE}/api/image/converter`
 export default function Main () {
@@ -134,6 +134,19 @@ const InputFile = ({ files, converter }) => {
   const [data, setData] = files
   const fileInputRef = useRef(null)
   const loading = data.some(item => item.loading)
+  const [anchorEl, setAnchorEl] = useState(null)
+  const open = Boolean(anchorEl)
+  const handleClick = (event) => {
+    setAnchorEl((val) => {
+      if (val) {
+        return null
+      }
+      return event.currentTarget
+    })
+  }
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
   const handleChange = (e) => {
     const InputFiles = Array.from(e.target.files)
     const temp = [...data, ...InputFiles]
@@ -153,22 +166,70 @@ const InputFile = ({ files, converter }) => {
       fileInputRef.current.value = ''
     }
   }
+  const handleClearConverted = () => {
+    if (window.confirm('Are you sure to clear all converted files?')) {
+      setData(data.filter(item => !item.fileconverted))
+    }
+  }
+  const handleClearNoConverted = () => {
+    if (window.confirm('Are you sure to clear all no converted files?')) {
+      setData(data.filter(item => item.fileconverted))
+    }
+  }
   return (
     <Box width='100%'>
       <Stack mx='auto' my={1} width='fit-content' direction='row' gap={1} flexWrap='wrap' justifyContent='space-around'>
-        <input accept='image/png,image/jpg,image/jpeg' type='file' multiple hidden id='input-file' onChange={handleChange} ref={fileInputRef} />
         <Button
-          disabled={data.length === 0} variant='contained' color='error' sx={{ textWrap: 'nowrap', width: 'fit-content', height: 'fit-content' }} startIcon={<Delete />} onClick={handleClear}
+          aria-controls={open ? 'demo-positioned-menu' : undefined} aria-haspopup='true' aria-expanded={open ? 'true' : undefined}
+          disabled={data.length === 0} disableElevation variant='contained' endIcon={<MoreVert />} color='error' sx={{ textWrap: 'nowrap', width: 'fit-content', height: 'fit-content' }} onClick={handleClick}
         >
-          Clear all
+          Clear
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            MenuListProps={{
+              'aria-labelledby': 'basic-button'
+            }}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'left'
+            }}
+          >
+            <MenuItem onClick={handleClear} disabled={data.length === 0}>
+              <ListItemIcon>
+                <ClearAll />
+              </ListItemIcon>
+              Clear
+            </MenuItem>
+            <MenuItem onClick={handleClearConverted} disabled={!data.some(item => item.fileconverted)}>
+              <ListItemIcon>
+                <ChecklistRtl />
+              </ListItemIcon>
+              Clear converted
+            </MenuItem>
+            <MenuItem onClick={handleClearNoConverted} disabled={!data.some(item => !item.fileconverted)}>
+              <ListItemIcon>
+                <Rule />
+              </ListItemIcon>
+              Clear no converted
+            </MenuItem>
+          </Menu>
         </Button>
-        <Stack component='label' htmlFor='input-file'>
-          <Button startIcon={<Upload />} variant='contained' sx={{ textWrap: 'nowrap', width: 'fit-content' }} component='span' role='button'>
-            Load Files
-          </Button>
-        </Stack>
-        <Button startIcon={<Compare />} variant='contained' sx={{ width: 'fit-content', textWrap: 'nowrap' }} disabled={data.length === 0 || loading} onClick={() => { converter() }}>
-          Convert {data.length > 1 && 'all'}
+        <Box>
+          <input accept='image/png,image/jpg,image/jpeg' type='file' multiple hidden id='input-file' onChange={handleChange} ref={fileInputRef} />
+          <Stack component='label' htmlFor='input-file'>
+            <Button disableElevation startIcon={<Upload />} variant='contained' sx={{ textWrap: 'nowrap', width: 'fit-content' }} component='span' role='button'>
+              Load Files
+            </Button>
+          </Stack>
+        </Box>
+        <Button disableElevation startIcon={<Compare />} variant='contained' sx={{ width: 'fit-content', textWrap: 'nowrap' }} disabled={(data.filter(item => !item.fileconverted)).length === 0 || loading} onClick={() => { converter() }}>
+          Convert {(data.filter(item => !item.fileconverted)).length > 1 && 'all'}
         </Button>
         <ApiStatusText />
       </Stack>
@@ -296,9 +357,7 @@ IconStatusApi.propTypes = {
 
 const APIServiceWaker = (setVal) => {
   setVal('checking')
-  if (!(Date.now() - parseInt(localStorage.getItem('waker')) > 360000)) {
-    if (localStorage.getItem('waker') !== null) setVal('up')
-  }
+  wakerF(setVal)
   setInterval(() => {
     wakerF(setVal)
   }, 15000)
@@ -307,7 +366,7 @@ const APIServiceWaker = (setVal) => {
 const wakerF = (setVal) => {
   if (Date.now() - parseInt(localStorage.getItem('waker')) > 300000 || localStorage.getItem('waker') === null) {
     try {
-      console.log('waking api')
+      localStorage.setItem('waker', Date.now())
       appAPIStatus().then(() => {
         setVal('up')
         localStorage.setItem('waker', Date.now())
@@ -315,6 +374,7 @@ const wakerF = (setVal) => {
         .catch((error) => {
           console.error(error)
           setVal('down')
+          localStorage.removeItem('waker')
         })
     } catch (error) {
       if (error.message === 'no focus' || error.message === 'no converting') {
