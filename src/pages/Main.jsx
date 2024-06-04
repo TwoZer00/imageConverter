@@ -55,7 +55,7 @@ export default function Main () {
         <Stack maxWidth='100dvw' height='100dvh'>
           <Stack component='header' direction='column' alignItems='center' mt={1}>
             <Typography variant='h1' fontSize={32} fontWeight={400} textTransform='uppercase'>Image converter</Typography>
-            <Typography variant='subtitle1' fontSize={12}>Convert images(png, jpeg, jpg) to webm</Typography>
+            <Typography variant='subtitle1' fontSize={12}>Convert images(png, jpeg, jpg) to webp</Typography>
           </Stack>
           <Box component='main'>
             <Box sx={{ position: 'sticky', backgroundColor: `${alpha(theme.palette.background.default, 0.25)}`, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0 }}>
@@ -254,7 +254,7 @@ const FileList = ({ files }) => {
             </Stack>
             <Box position='relative'>
               <img src={URL.createObjectURL(file.fileconverted || file)} alt={file.name} style={{ height: 'auto', width: '100%', objectFit: 'contain' }} />
-              {file.fileconverted && <Chip sx={{ m: 2, position: 'absolute', right: 0, top: 0, zIndex: 1, textTransform: 'uppercase' }} color='secondary' size='small' variant='contained' label='webm' />}
+              {file.fileconverted && <Chip sx={{ m: 2, position: 'absolute', right: 0, top: 0, zIndex: 1, textTransform: 'uppercase' }} color='secondary' size='small' variant='contained' label='webp' />}
             </Box>
             <Tooltip title={`${getSizeNumber(file.size) > 5 ? 'File exceeds 5Mb' : ''}`}>
               <Typography variant='caption' color={`${getSizeNumber(file.size) > 5 ? 'crimson' : 'inherit'}`} textAlign='center' display='block'>{getSize(file.size)}</Typography>
