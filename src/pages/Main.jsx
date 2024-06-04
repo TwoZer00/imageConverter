@@ -176,6 +176,27 @@ const InputFile = ({ files, converter }) => {
       setData(data.filter(item => item.fileconverted))
     }
   }
+
+  useEffect(() => {
+    if (data.length > 0 && data.every(item => item.fileconverted)) {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          const notification = new Notification('All files converted', {
+            body: 'All files converted',
+            tag: 'convertion',
+            timestamp: Date.now()
+          })
+          notification.addEventListener('click', () => {
+            window.focus()
+            notification.close()
+          })
+          setTimeout(() => {
+            notification.close()
+          }, 5000)
+        }
+      })
+    }
+  }, [data])
   return (
     <Box width='100%'>
       <Stack mx='auto' my={1} width='fit-content' direction='row' gap={1} flexWrap='wrap' justifyContent='space-around'>
@@ -395,4 +416,29 @@ const wakerF = (setVal) => {
 const isConverting = () => {
   if (sessionStorage.getItem('convertion') === null) return true
   return (Date.now() - parseInt(sessionStorage.getItem('convertion')) > 600000)
+}
+
+const notifyMe = () => {
+  if (!('Notification' in window)) {
+    // Check if the browser supports notifications
+  } else if (Notification.permission === 'granted') {
+    // Check whether notification permissions have already been granted;
+    // if so, create a notification
+    const notification = new Notification('Hi there!', {
+      body: 'Have a good day'
+    })
+    // …
+  } else if (Notification.permission !== 'denied') {
+    // We need to ask the user for permission
+    Notification.requestPermission().then((permission) => {
+      // If the user accepts, let's create a notification
+      if (permission === 'granted') {
+        const notification = new Notification('Hi there!')
+        // …
+      }
+    })
+  }
+
+  // At last, if the user has denied notifications, and you
+  // want to be respectful there is no need to bother them anymore.
 }
