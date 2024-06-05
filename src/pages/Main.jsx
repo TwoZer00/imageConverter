@@ -2,7 +2,7 @@ import { PropTypes } from 'prop-types'
 import { useEffect, useRef, useState } from 'react'
 import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip, Menu, MenuItem, ListItemIcon, ButtonGroup } from '@mui/material'
 import Masonry from '@mui/lab/Masonry'
-import { ChecklistRtl, Clear, ClearAll, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, MoreVert, Rule, Upload } from '@mui/icons-material'
+import { ChecklistRtl, Clear, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, MoreVert, Rule, Upload } from '@mui/icons-material'
 const API_URL_BASE = 'https://image-converter-k56z.onrender.com'
 const API_URL = `${API_URL_BASE}/api/image/converter`
 const requestStateEnum = {
@@ -351,7 +351,7 @@ InputFile.propTypes = {
   files: PropTypes.array.isRequired,
   converter: PropTypes.func.isRequired,
   loading: PropTypes.bool,
-  requestState: PropTypes.string
+  requestState: PropTypes.number
 }
 FileList.propTypes = {
   files: PropTypes.array.isRequired
