@@ -76,6 +76,11 @@ export default function Main () {
       }, 3000)
     })
   }
+  useEffect(() => {
+    if (Notification.permission !== 'granted') {
+      Notification.requestPermission()
+    }
+  }, [])
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -222,22 +227,20 @@ const InputFile = ({ files, converter, loading, requestState }) => {
 
   useEffect(() => {
     if (requestStateEnum.done === requestState) {
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-          const notification = new Notification('All files converted', {
-            body: 'All files converted',
-            tag: 'convertion',
-            timestamp: Date.now()
-          })
-          notification.addEventListener('click', () => {
-            window.focus()
-            notification.close()
-          })
-          setTimeout(() => {
-            notification.close()
-          }, 5000)
-        }
-      })
+      if (Notification.permission === 'granted') {
+        const notification = new Notification('All files converted', {
+          body: 'Your files have been converted',
+          tag: 'convertion',
+          timestamp: Date.now()
+        })
+        notification.addEventListener('click', () => {
+          window.focus()
+          notification.close()
+        })
+        setTimeout(() => {
+          notification.close()
+        }, 5000)
+      }
     }
   }, [requestState])
   return (
