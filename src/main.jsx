@@ -10,7 +10,7 @@ import { getAnalytics } from 'firebase/analytics'
 import { app } from './firebase/init'
 
 const router = createBrowserRouter(Routes)
-getAnalytics(app)
+if (import.meta.env.VITE_ENV) getAnalytics(app)
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

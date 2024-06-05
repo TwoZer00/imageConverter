@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip, Menu, MenuItem, ListItemIcon, ButtonGroup, Snackbar, Slide, Alert } from '@mui/material'
 import Masonry from '@mui/lab/Masonry'
 import { ChecklistRtl, Clear, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, MoreVert, Rule, Upload } from '@mui/icons-material'
+import { getAnalytics, logEvent } from 'firebase/analytics'
 const API_URL_BASE = 'https://image-converter-k56z.onrender.com'
 const API_URL = `${API_URL_BASE}/api/image/converter`
 const requestStateEnum = {
@@ -48,6 +49,10 @@ export default function Main () {
       setRequestState(requestStateEnum.stillLoading)
     }, 30000)
     Promise.allSettled(promises).then((values) => {
+      logEvent(getAnalytics(), 'convert_image', {
+        convertedFiles: values.length,
+        totalFiles: files.length
+      })
       setFiles((val) => {
         const temp = [...val]
         for (const item of values) {
@@ -60,6 +65,9 @@ export default function Main () {
     }).catch((error) => {
       console.error(error)
       setRequestState(requestStateEnum.error)
+      logEvent(getAnalytics(), 'convert_image_error', {
+        error: error.message
+      })
     }).finally(() => {
       clearTimeout(timeOut)
       setRequestState(requestStateEnum.done)
@@ -208,6 +216,9 @@ const InputFile = ({ files, converter, loading, requestState }) => {
       setData(data.filter(item => item.fileconverted))
     }
   }
+  const handleConvert = () => {
+    converter()
+  }
 
   useEffect(() => {
     if (requestStateEnum.done === requestState) {
@@ -280,7 +291,7 @@ const InputFile = ({ files, converter, loading, requestState }) => {
             </Button>
           </Stack>
         </Box>
-        <Button disableElevation startIcon={<Compare />} variant='contained' sx={{ width: 'fit-content', textWrap: 'nowrap' }} disabled={(data.filter(item => !item.fileconverted)).length === 0 || loading} onClick={() => { converter() }}>
+        <Button disableElevation startIcon={<Compare />} variant='contained' sx={{ width: 'fit-content', textWrap: 'nowrap' }} disabled={(data.filter(item => !item.fileconverted)).length === 0 || loading} onClick={handleConvert}>
           Convert {(data.filter(item => !item.fileconverted)).length > 1 && 'all'}
         </Button>
       </Stack>
