@@ -5,47 +5,101 @@ import Masonry from '@mui/lab/Masonry'
 import { ChecklistRtl, Clear, ClearAll, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Download, MoreVert, Rule, Upload } from '@mui/icons-material'
 const API_URL_BASE = 'https://image-converter-k56z.onrender.com'
 const API_URL = `${API_URL_BASE}/api/image/converter`
+const requestStateEnum = {
+  none: 0,
+  loading: 1,
+  done: 2,
+  error: 3
+}
 export default function Main () {
   const theme = createTheme()
   const [files, setFiles] = useState([])
+  const [requestState, setRequestState] = useState(requestStateEnum.none)
+  // const convert1 = () => {
+  //   const temp = [...files]
+  //   temp.forEach((item, index) => {
+  //     const formData = new FormData()
+  //     formData.append('image', item)
+  //     setFiles((val) => {
+  //       const temp = [...val]
+  //       temp[index] = item
+  //       return temp
+  //     })
+  //     if (item.fileconverted) {
+  //       return // work as continue
+  //     }
+  //     item.loading = true
+  //     fetch(API_URL, { method: 'POST', body: formData }).then(async (res) => {
+  //       if (res.status !== 200) {
+  //         throw new Error((await res.json()).message)
+  //       }
+  //       sessionStorage.setItem('convertion', Date.now())
+  //       return res.blob()
+  //     }).then((blob) => {
+  //       item.fileconverted = blob // save blob to item
+  //       item.downloable = true
+  //       item.loading = false
+  //       setFiles((val) => {
+  //         const temp = [...val]
+  //         temp[index] = item
+  //         return temp
+  //       })
+  //     }).catch((error) => {
+  //       item.loading = false
+  //       item.error = error.message
+  //       setFiles((val) => {
+  //         const temp = [...val]
+  //         temp[index] = item
+  //         return temp
+  //       })
+  //     })
+  //   })
+  // }
+
   const convert = () => {
+    setRequestState(requestStateEnum.loading)
     const temp = [...files]
-    temp.forEach((item, index) => {
-      const formData = new FormData()
-      formData.append('image', item)
+    const promises = []
+    for (const item of temp) {
+      if (item.fileconverted) {
+        continue
+      }
+      const promise = new Promise((resolve, reject) => {
+        const formData = new FormData()
+        formData.append('image', item)
+        fetch(API_URL, { method: 'POST', body: formData }).then(async (res) => {
+          if (res.status !== 200) {
+            reject(new Error((await res.json()).message))
+          }
+          sessionStorage.setItem('convertion', Date.now())
+          return res.blob()
+        }).then((blob) => {
+          item.fileconverted = blob // save blob to item
+          item.downloable = true
+          resolve(item)
+        }).catch((error) => {
+          reject(error)
+        })
+      })
+      promises.push(promise)
+    }
+    Promise.allSettled(promises).then((values) => {
       setFiles((val) => {
         const temp = [...val]
-        temp[index] = item
+        for (const item of values) {
+          if (item.status === 'fulfilled') {
+            temp[temp.findIndex((i) => i.name === item.value.name)] = item.value
+          }
+        }
         return temp
       })
-      if (item.fileconverted) {
-        return // work as continue
-      }
-      item.loading = true
-      fetch(API_URL, { method: 'POST', body: formData }).then(async (res) => {
-        if (res.status !== 200) {
-          throw new Error((await res.json()).message)
-        }
-        sessionStorage.setItem('convertion', Date.now())
-        return res.blob()
-      }).then((blob) => {
-        item.fileconverted = blob // save blob to item
-        item.downloable = true
-        item.loading = false
-        setFiles((val) => {
-          const temp = [...val]
-          temp[index] = item
-          return temp
-        })
-      }).catch((error) => {
-        item.loading = false
-        item.error = error.message
-        setFiles((val) => {
-          const temp = [...val]
-          temp[index] = item
-          return temp
-        })
-      })
+    }).catch((error) => {
+      alert(error.message)
+    }).finally(() => {
+      setRequestState(requestStateEnum.done)
+      setTimeout(() => {
+        setRequestState(requestStateEnum.none)
+      }, 3000)
     })
   }
   return (
@@ -59,7 +113,7 @@ export default function Main () {
           </Stack>
           <Box component='main'>
             <Box sx={{ position: 'sticky', backgroundColor: `${alpha(theme.palette.background.default, 0.25)}`, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0 }}>
-              <InputFile files={[files, setFiles]} converter={convert} loading={files.some(item => item.loading)} />
+              <InputFile files={[files, setFiles]} converter={convert} loading={requestState === requestStateEnum.loading} requestState={requestState} />
             </Box>
             <FileList files={[files, setFiles]} />
           </Box>
@@ -130,10 +184,9 @@ const CloseCustomButton = (props) => {
     </InputAdornment>
   )
 }
-const InputFile = ({ files, converter }) => {
+const InputFile = ({ files, converter, loading, requestState }) => {
   const [data, setData] = files
   const fileInputRef = useRef(null)
-  const loading = data.some(item => item.loading)
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
   const handleClick = (event) => {
@@ -178,7 +231,7 @@ const InputFile = ({ files, converter }) => {
   }
 
   useEffect(() => {
-    if (data.length > 0 && data.every(item => item.fileconverted)) {
+    if (requestStateEnum.done === requestState) {
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
           const notification = new Notification('All files converted', {
@@ -196,7 +249,7 @@ const InputFile = ({ files, converter }) => {
         }
       })
     }
-  }, [data])
+  }, [requestState])
   return (
     <Box width='100%'>
       <Stack mx='auto' my={1} width='fit-content' direction='row' gap={1} flexWrap='wrap' justifyContent='space-around'>
@@ -298,7 +351,8 @@ const FileList = ({ files }) => {
 InputFile.propTypes = {
   files: PropTypes.array.isRequired,
   converter: PropTypes.func.isRequired,
-  loading: PropTypes.bool.isRequired
+  loading: PropTypes.bool,
+  requestState: PropTypes.string
 }
 FileList.propTypes = {
   files: PropTypes.array.isRequired
@@ -416,29 +470,4 @@ const wakerF = (setVal) => {
 const isConverting = () => {
   if (sessionStorage.getItem('convertion') === null) return true
   return (Date.now() - parseInt(sessionStorage.getItem('convertion')) > 600000)
-}
-
-const notifyMe = () => {
-  if (!('Notification' in window)) {
-    // Check if the browser supports notifications
-  } else if (Notification.permission === 'granted') {
-    // Check whether notification permissions have already been granted;
-    // if so, create a notification
-    const notification = new Notification('Hi there!', {
-      body: 'Have a good day'
-    })
-    // …
-  } else if (Notification.permission !== 'denied') {
-    // We need to ask the user for permission
-    Notification.requestPermission().then((permission) => {
-      // If the user accepts, let's create a notification
-      if (permission === 'granted') {
-        const notification = new Notification('Hi there!')
-        // …
-      }
-    })
-  }
-
-  // At last, if the user has denied notifications, and you
-  // want to be respectful there is no need to bother them anymore.
 }
