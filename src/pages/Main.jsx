@@ -1,6 +1,6 @@
 import { PropTypes } from 'prop-types'
 import { useEffect, useRef, useState } from 'react'
-import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip, Menu, MenuItem, ListItemIcon, ButtonGroup } from '@mui/material'
+import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip, Menu, MenuItem, ListItemIcon, ButtonGroup, Snackbar, Slide, Alert } from '@mui/material'
 import Masonry from '@mui/lab/Masonry'
 import { ChecklistRtl, Clear, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, MoreVert, Rule, Upload } from '@mui/icons-material'
 const API_URL_BASE = 'https://image-converter-k56z.onrender.com'
@@ -9,7 +9,8 @@ const requestStateEnum = {
   none: 0,
   loading: 1,
   done: 2,
-  error: 3
+  error: 3,
+  stillLoading: 4
 }
 export default function Main () {
   const theme = createTheme()
@@ -83,6 +84,10 @@ export default function Main () {
       })
       promises.push(promise)
     }
+    // check if petition is taking more than 30 secs
+    const timeOut = setTimeout(() => {
+      setRequestState(requestStateEnum.stillLoading)
+    }, 30000)
     Promise.allSettled(promises).then((values) => {
       setFiles((val) => {
         const temp = [...val]
@@ -94,8 +99,10 @@ export default function Main () {
         return temp
       })
     }).catch((error) => {
-      alert(error.message)
+      console.error(error)
+      setRequestState(requestStateEnum.error)
     }).finally(() => {
+      clearTimeout(timeOut)
       setRequestState(requestStateEnum.done)
       setTimeout(() => {
         setRequestState(requestStateEnum.none)
@@ -117,6 +124,19 @@ export default function Main () {
             </Box>
             <FileList files={[files, setFiles]} />
           </Box>
+          <Snackbar
+            open={requestStateEnum.stillLoading === requestState}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            TransitionComponent={Slide}
+          >
+            <Alert
+              severity='warning'
+              variant='filled'
+              sx={{ width: '100%' }}
+            >
+              Service may take more than 50 seconds if not in use. <br />
+            </Alert>
+          </Snackbar>
         </Stack>
       </ThemeProvider>
     </>
@@ -306,7 +326,7 @@ const InputFile = ({ files, converter, loading, requestState }) => {
         </Button>
         {/* <ApiStatusText /> */}
       </Stack>
-      <LinearProgress sx={{ width: '100%', visibility: `${!loading && 'hidden'}` }} />
+      <LinearProgress sx={{ width: '100%', visibility: `${(!loading || requestState !== requestStateEnum.stillLoading) && 'hidden'}` }} />
     </Box>
   )
 }
