@@ -284,7 +284,7 @@ const InputFile = ({ files, converter, loading, requestState }) => {
           Convert {(data.filter(item => !item.fileconverted)).length > 1 && 'all'}
         </Button>
       </Stack>
-      <LinearProgress sx={{ width: '100%', visibility: `${(!loading || requestState !== requestStateEnum.stillLoading) && 'hidden'}` }} />
+      <LinearProgress sx={{ width: '100%', visibility: `${(requestState === requestStateEnum.loading || requestState === requestStateEnum.stillLoading) ? 'visible' : 'hidden'}` }} />
     </Box>
   )
 }
