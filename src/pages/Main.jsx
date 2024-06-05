@@ -16,47 +16,6 @@ export default function Main () {
   const theme = createTheme()
   const [files, setFiles] = useState([])
   const [requestState, setRequestState] = useState(requestStateEnum.none)
-  // const convert1 = () => {
-  //   const temp = [...files]
-  //   temp.forEach((item, index) => {
-  //     const formData = new FormData()
-  //     formData.append('image', item)
-  //     setFiles((val) => {
-  //       const temp = [...val]
-  //       temp[index] = item
-  //       return temp
-  //     })
-  //     if (item.fileconverted) {
-  //       return // work as continue
-  //     }
-  //     item.loading = true
-  //     fetch(API_URL, { method: 'POST', body: formData }).then(async (res) => {
-  //       if (res.status !== 200) {
-  //         throw new Error((await res.json()).message)
-  //       }
-  //       sessionStorage.setItem('convertion', Date.now())
-  //       return res.blob()
-  //     }).then((blob) => {
-  //       item.fileconverted = blob // save blob to item
-  //       item.downloable = true
-  //       item.loading = false
-  //       setFiles((val) => {
-  //         const temp = [...val]
-  //         temp[index] = item
-  //         return temp
-  //       })
-  //     }).catch((error) => {
-  //       item.loading = false
-  //       item.error = error.message
-  //       setFiles((val) => {
-  //         const temp = [...val]
-  //         temp[index] = item
-  //         return temp
-  //       })
-  //     })
-  //   })
-  // }
-
   const convert = () => {
     setRequestState(requestStateEnum.loading)
     const temp = [...files]
@@ -324,7 +283,6 @@ const InputFile = ({ files, converter, loading, requestState }) => {
         <Button disableElevation startIcon={<Compare />} variant='contained' sx={{ width: 'fit-content', textWrap: 'nowrap' }} disabled={(data.filter(item => !item.fileconverted)).length === 0 || loading} onClick={() => { converter() }}>
           Convert {(data.filter(item => !item.fileconverted)).length > 1 && 'all'}
         </Button>
-        {/* <ApiStatusText /> */}
       </Stack>
       <LinearProgress sx={{ width: '100%', visibility: `${(!loading || requestState !== requestStateEnum.stillLoading) && 'hidden'}` }} />
     </Box>
@@ -395,41 +353,6 @@ const getSizeNumber = (size) => {
   const mb = kb / 1024
   return mb.toFixed(2)
 }
-const appAPIStatus = (isTemp = false) => {
-  const options = {
-    method: 'HEAD',
-    mode: 'no-cors'
-  }
-  if (isTemp) options.signal = AbortSignal.timeout(2000)
-  if (!document.hasFocus()) throw new Error('no focus')
-  if (isConverting()) throw new Error('no converting')
-  return fetch(API_URL_BASE, options)
-}
-// eslint-disable-next-line no-unused-vars
-const ApiStatusText = () => {
-  const [apiStatus, setApiStatus] = useState('checking')
-  const apiStatusRef = useRef('initiating')
-  useEffect(() => {
-    if (apiStatusRef.current === 'initiating') {
-      APIServiceWaker(setApiStatus)
-      apiStatusRef.current = 'done'
-    }
-  }, [])
-  return (
-    <>
-      <Box px='.75rem' py='.30rem' sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2, width: 'fit-content', mx: 'auto' }}>
-        <Stack direction='row' gap={1} alignItems='center'>
-          <Tooltip title={apiStatus === 'up' ? 'service is running' : apiStatus === 'down' ? 'service is down' : 'service is loading'}>
-            <IconButton sx={{ p: 0 }}>
-              <IconStatusApi status={apiStatus} />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      </Box>
-    </>
-  )
-}
-
 const IconStatusApi = ({ status, ...props }) => {
   switch (status) {
     case 'up':
@@ -448,45 +371,4 @@ const IconStatusApi = ({ status, ...props }) => {
 IconStatusApi.propTypes = {
   status: PropTypes.string.isRequired,
   fontSize: PropTypes.string
-}
-
-const APIServiceWaker = (setVal) => {
-  setVal('checking')
-  wakerF(setVal)
-  setInterval(() => {
-    wakerF(setVal)
-  }, 7500)
-}
-
-const wakerF = (setVal) => {
-  if (Date.now() - parseInt(localStorage.getItem('waker')) > 300000 || localStorage.getItem('waker') === null) {
-    try {
-      localStorage.setItem('waker', Date.now())
-      appAPIStatus().then(() => {
-        setVal('up')
-        localStorage.setItem('waker', Date.now())
-      })
-        .catch((error) => {
-          console.error(error)
-          setVal('down')
-          localStorage.removeItem('waker')
-        })
-    } catch (error) {
-      // console.error(error)
-      if (error.message === 'no focus' || error.message === 'no converting') {
-        setVal('checking')
-      }
-      localStorage.removeItem('waker')
-    }
-  } else {
-    setVal((val) => {
-      if (val !== 'up') return 'up'
-      return val
-    })
-  }
-}
-/** Flag to avoid keep waking api */
-const isConverting = () => {
-  if (sessionStorage.getItem('convertion') === null) return true
-  return (Date.now() - parseInt(sessionStorage.getItem('convertion')) > 600000)
 }
