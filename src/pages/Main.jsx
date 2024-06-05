@@ -87,7 +87,7 @@ export default function Main () {
           </Stack>
           <Box component='main'>
             <Box sx={{ position: 'sticky', backgroundColor: `${alpha(theme.palette.background.default, 0.25)}`, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0 }}>
-              <InputFile files={[files, setFiles]} converter={convert} loading={requestState === requestStateEnum.loading} requestState={requestState} />
+              <InputFile files={[files, setFiles]} converter={convert} loading={requestState === requestStateEnum.loading || requestState === requestStateEnum.stillLoading} requestState={requestState} />
             </Box>
             <FileList files={[files, setFiles]} />
           </Box>
@@ -243,13 +243,13 @@ const InputFile = ({ files, converter, loading, requestState }) => {
   return (
     <Box width='100%'>
       <Stack mx='auto' my={1} width='fit-content' direction='row' gap={1} flexWrap='wrap' justifyContent='space-around'>
-        <ButtonGroup variant='contained' color='error' disableElevation>
-          <Button startIcon={<Delete />} disabled={data.length === 0} color='error' onClick={handleClear}>
+        <ButtonGroup variant='contained' color='error' disableElevation disabled={loading}>
+          <Button startIcon={<Delete />} disabled={data.length === 0 || loading} color='error' onClick={handleClear}>
             Clear
           </Button>
           <Button
             aria-controls={open ? 'demo-positioned-menu' : undefined} color='error' aria-haspopup='true' aria-expanded={open ? 'true' : undefined}
-            disabled={data.length === 0} onClick={handleClick} sx={{ px: 0 }}
+            disabled={data.length === 0 || loading} onClick={handleClick} sx={{ px: 0 }}
           >
             <MoreVert />
             <Menu
@@ -286,7 +286,7 @@ const InputFile = ({ files, converter, loading, requestState }) => {
         <Box>
           <input accept='image/png,image/jpg,image/jpeg' type='file' multiple hidden id='input-file' onChange={handleChange} ref={fileInputRef} />
           <Stack component='label' htmlFor='input-file'>
-            <Button disableElevation startIcon={<Upload />} variant='contained' sx={{ textWrap: 'nowrap', width: 'fit-content' }} component='span' role='button'>
+            <Button disableElevation startIcon={<Upload />} disabled={loading} variant='contained' sx={{ textWrap: 'nowrap', width: 'fit-content' }} component='span' role='button'>
               Load Files
             </Button>
           </Stack>
@@ -295,7 +295,7 @@ const InputFile = ({ files, converter, loading, requestState }) => {
           Convert {(data.filter(item => !item.fileconverted)).length > 1 && 'all'}
         </Button>
       </Stack>
-      <LinearProgress sx={{ width: '100%', visibility: `${(requestState === requestStateEnum.loading || requestState === requestStateEnum.stillLoading) ? 'visible' : 'hidden'}` }} />
+      <LinearProgress sx={{ width: '100%', visibility: `${loading ? 'visible' : 'hidden'}` }} />
     </Box>
   )
 }
