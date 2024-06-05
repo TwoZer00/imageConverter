@@ -1,8 +1,8 @@
 import { PropTypes } from 'prop-types'
 import { useEffect, useRef, useState } from 'react'
-import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip, Menu, MenuItem, ListItemIcon } from '@mui/material'
+import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip, Menu, MenuItem, ListItemIcon, ButtonGroup } from '@mui/material'
 import Masonry from '@mui/lab/Masonry'
-import { ChecklistRtl, Clear, ClearAll, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Download, MoreVert, Rule, Upload } from '@mui/icons-material'
+import { ChecklistRtl, Clear, ClearAll, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, MoreVert, Rule, Upload } from '@mui/icons-material'
 const API_URL_BASE = 'https://image-converter-k56z.onrender.com'
 const API_URL = `${API_URL_BASE}/api/image/converter`
 const requestStateEnum = {
@@ -253,47 +253,46 @@ const InputFile = ({ files, converter, loading, requestState }) => {
   return (
     <Box width='100%'>
       <Stack mx='auto' my={1} width='fit-content' direction='row' gap={1} flexWrap='wrap' justifyContent='space-around'>
-        <Button
-          aria-controls={open ? 'demo-positioned-menu' : undefined} aria-haspopup='true' aria-expanded={open ? 'true' : undefined}
-          disabled={data.length === 0} disableElevation variant='contained' endIcon={<MoreVert />} color='error' sx={{ textWrap: 'nowrap', width: 'fit-content', height: 'fit-content' }} onClick={handleClick}
-        >
-          Clear
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            MenuListProps={{
-              'aria-labelledby': 'basic-button'
-            }}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'left'
-            }}
+        <ButtonGroup variant='contained' color='error' disableElevation>
+          <Button startIcon={<Delete />} disabled={data.length === 0} color='error' onClick={handleClear}>
+            Clear
+          </Button>
+          <Button
+            aria-controls={open ? 'demo-positioned-menu' : undefined} color='error' aria-haspopup='true' aria-expanded={open ? 'true' : undefined}
+            disabled={data.length === 0} onClick={handleClick} sx={{ px: 0 }}
           >
-            <MenuItem onClick={handleClear} disabled={data.length === 0}>
-              <ListItemIcon>
-                <ClearAll />
-              </ListItemIcon>
-              Clear
-            </MenuItem>
-            <MenuItem onClick={handleClearConverted} disabled={!data.some(item => item.fileconverted)}>
-              <ListItemIcon>
-                <ChecklistRtl />
-              </ListItemIcon>
-              Clear converted
-            </MenuItem>
-            <MenuItem onClick={handleClearNoConverted} disabled={!data.some(item => !item.fileconverted)}>
-              <ListItemIcon>
-                <Rule />
-              </ListItemIcon>
-              Clear no converted
-            </MenuItem>
-          </Menu>
-        </Button>
+            <MoreVert />
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              MenuListProps={{
+                'aria-labelledby': 'basic-button'
+              }}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'left'
+              }}
+            >
+              <MenuItem onClick={handleClearConverted} disabled={!data.some(item => item.fileconverted)}>
+                <ListItemIcon>
+                  <ChecklistRtl />
+                </ListItemIcon>
+                Clear converted
+              </MenuItem>
+              <MenuItem onClick={handleClearNoConverted} disabled={!data.some(item => !item.fileconverted)}>
+                <ListItemIcon>
+                  <Rule />
+                </ListItemIcon>
+                Clear no converted
+              </MenuItem>
+            </Menu>
+          </Button>
+        </ButtonGroup>
         <Box>
           <input accept='image/png,image/jpg,image/jpeg' type='file' multiple hidden id='input-file' onChange={handleChange} ref={fileInputRef} />
           <Stack component='label' htmlFor='input-file'>
