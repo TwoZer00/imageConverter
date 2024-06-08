@@ -1,6 +1,6 @@
 import { PropTypes } from 'prop-types'
 import { useEffect, useRef, useState } from 'react'
-import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip, Menu, MenuItem, ListItemIcon, ButtonGroup, Snackbar, Slide, Alert } from '@mui/material'
+import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip, Menu, MenuItem, ListItemIcon, ButtonGroup, Snackbar, Slide, Alert, Link } from '@mui/material'
 import Masonry from '@mui/lab/Masonry'
 import { ChecklistRtl, Clear, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, MoreVert, Rule, Upload } from '@mui/icons-material'
 import { getAnalytics, logEvent } from 'firebase/analytics'
@@ -95,6 +95,15 @@ export default function Main () {
               <InputFile files={[files, setFiles]} converter={convert} loading={requestState === requestStateEnum.loading || requestState === requestStateEnum.stillLoading} requestState={requestState} />
             </Box>
             <FileList files={[files, setFiles]} />
+          </Box>
+          <Box component='footer' position='fixed' width='100%' sx={{ bottom: 0, backgroundColor: theme.palette.background.default }}>
+            <Typography variant='body2' textAlign='center'>
+              Made with ❤️ by &copy;
+              <Link href='https://twozer00.dev' target='_blank' color='secondary'>
+                <strong>TwoZer00</strong>
+              </Link>
+              {` ${new Date().getFullYear()}`}
+            </Typography>
           </Box>
           <Snackbar
             open={requestStateEnum.stillLoading === requestState}
