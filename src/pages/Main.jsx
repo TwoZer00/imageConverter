@@ -77,7 +77,7 @@ export default function Main () {
     })
   }
   useEffect(() => {
-    if (Notification.permission !== 'granted') {
+    if (('Notification' in window) && Notification.permission !== 'granted') {
       Notification.requestPermission()
     }
   }, [])
@@ -227,7 +227,7 @@ const InputFile = ({ files, converter, loading, requestState }) => {
 
   useEffect(() => {
     if (requestStateEnum.done === requestState) {
-      if (Notification.permission === 'granted') {
+      if (('Notification' in window) && Notification.permission === 'granted') {
         const notification = new Notification('All files converted', {
           body: 'Your files have been converted',
           tag: 'convertion',
