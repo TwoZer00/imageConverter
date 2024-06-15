@@ -23,7 +23,7 @@ export default function Main () {
     const temp = [...files]
     const promises = []
     for (const item of temp) {
-      if (item.fileconverted) {
+      if (item.fileconverted || item.error) {
         continue
       }
       const promise = new Promise((resolve, reject) => {
