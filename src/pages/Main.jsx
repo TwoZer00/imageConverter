@@ -2,9 +2,9 @@ import { PropTypes } from 'prop-types'
 import { useEffect, useRef, useState } from 'react'
 import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography, IconButton, useTheme, alpha, LinearProgress, Chip, TextField, InputAdornment, Tooltip, Menu, MenuItem, ListItemIcon, ButtonGroup, Snackbar, Slide, Alert, Link } from '@mui/material'
 import Masonry from '@mui/lab/Masonry'
-import { ChecklistRtl, Clear, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, MoreVert, Rule, Upload } from '@mui/icons-material'
+import { ChecklistRtl, Clear, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, ErrorOutline, MoreVert, Rule, Upload } from '@mui/icons-material'
 import { getAnalytics, logEvent } from 'firebase/analytics'
-const API_URL_BASE = 'https://image-converter-k56z.onrender.com'
+const API_URL_BASE = (import.meta.env.VITE_API_URL || 'https://image-converter-k56z.onrender.com')
 const API_URL = `${API_URL_BASE}/api/image/converter`
 const requestStateEnum = {
   none: 0,
@@ -16,6 +16,7 @@ const requestStateEnum = {
 export default function Main () {
   const theme = createTheme()
   const [files, setFiles] = useState([])
+  const fileInputRef = useRef()
   const [requestState, setRequestState] = useState(requestStateEnum.none)
   const convert = () => {
     setRequestState(requestStateEnum.loading)
@@ -29,17 +30,18 @@ export default function Main () {
         const formData = new FormData()
         formData.append('image', item)
         fetch(API_URL, { method: 'POST', body: formData }).then(async (res) => {
-          if (res.status !== 200) {
-            reject(new Error((await res.json()).message))
+          if (!res.ok) {
+            item.error = (await res.json()).message
+            throw new Error(item.error)
           }
-          sessionStorage.setItem('convertion', Date.now())
           return res.blob()
         }).then((blob) => {
           item.fileconverted = blob // save blob to item
           item.downloable = true
           resolve(item)
         }).catch((error) => {
-          reject(error)
+          console.error(error.message)
+          reject(error.message)
         })
       })
       promises.push(promise)
@@ -49,25 +51,21 @@ export default function Main () {
       setRequestState(requestStateEnum.stillLoading)
     }, 30000)
     Promise.allSettled(promises).then((values) => {
-      logEvent(getAnalytics(), 'convert_image', {
-        convertedFiles: values.length,
-        totalFiles: files.length
-      })
-      setFiles((val) => {
-        const temp = [...val]
-        for (const item of values) {
-          if (item.status === 'fulfilled') {
-            temp[temp.findIndex((i) => i.name === item.value.name)] = item.value
-          }
-        }
-        return temp
-      })
+      if (!import.meta.env.VITE_ENV) {
+        logEvent(getAnalytics(), 'convert_image', {
+          convertedFiles: values.length,
+          totalFiles: files.length
+        })
+      }
     }).catch((error) => {
       console.error(error)
       setRequestState(requestStateEnum.error)
-      logEvent(getAnalytics(), 'convert_image_error', {
-        error: error.message
-      })
+      if (!import.meta.env.VITE_ENV) {
+        logEvent(getAnalytics(), 'convert_image_error', {
+          error: error.message
+        })
+      }
+      return error
     }).finally(() => {
       clearTimeout(timeOut)
       setRequestState(requestStateEnum.done)
@@ -88,13 +86,13 @@ export default function Main () {
         <Stack maxWidth='100dvw' height='100dvh'>
           <Stack component='header' direction='column' alignItems='center' mt={1}>
             <Typography variant='h1' fontSize={32} fontWeight={400} textTransform='uppercase'>Image converter</Typography>
-            <Typography variant='subtitle1' fontSize={12}>Convert images(png, jpeg, jpg) to webp</Typography>
+            <Typography variant='subtitle1' fontSize={12}>Convert images to webp</Typography>
           </Stack>
           <Box component='main'>
             <Box sx={{ position: 'sticky', backgroundColor: `${alpha(theme.palette.background.default, 0.25)}`, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0 }}>
-              <InputFile files={[files, setFiles]} converter={convert} loading={requestState === requestStateEnum.loading || requestState === requestStateEnum.stillLoading} requestState={requestState} />
+              <InputFile files={[files, setFiles]} inputRef={fileInputRef} converter={convert} loading={requestState === requestStateEnum.loading || requestState === requestStateEnum.stillLoading} requestState={requestState} />
             </Box>
-            <FileList files={[files, setFiles]} />
+            <FileList files={[files, setFiles]} inputRef={fileInputRef} />
           </Box>
           <Box component='footer' position='fixed' width='100%' sx={{ bottom: 0, backgroundColor: theme.palette.background.default }}>
             <Typography variant='body2' textAlign='center'>
@@ -123,35 +121,59 @@ export default function Main () {
     </>
   )
 }
-const InputFilename = ({ file, index }) => {
-  const [data, setFiles] = file
-  const inputRef = useRef(null)
+const InputFilename = ({ file, index, placeholder }) => {
+  const [, setFiles] = file
+  const [filename, setFilename] = useState('')
   const [props, setProps] = useState({
     readOnly: true
   })
   const handleChange = (e) => {
+    setFilename(e.target.value)
     setFiles((val) => {
       const temp = [...val]
       temp[index].newName = e.target.value
       return temp
     })
   }
+
+  useEffect(() => {
+    if (filename.length > 0) {
+      setProps((val) => {
+        const temp = { ...val }
+        temp.readOnly = false
+        temp.endAdornment = <CloseCustomButton setFilename={setFilename} />
+        return temp
+      })
+    } else {
+      setProps((val) => {
+        const temp = { ...val }
+        temp.readOnly = true
+        delete temp.endAdornment
+        return temp
+      })
+      setFiles((val) => {
+        const temp = [...val]
+        delete temp[index].newName
+        return temp
+      })
+    }
+  }, [filename, index, setFiles])
   return (
     <>
       <TextField
         fullWidth
         sx={{ '& .MuiInput-root:hover:not(.Mui-disabled, .Mui-error):before': { border: 'none' }, '& .MuiInput-root:before': { border: 'none' } }}
         InputProps={props}
-        inputProps={{ ref: inputRef, autoComplete: 'off' }}
-        defaultValue={data.newName}
-        placeholder={data.name}
+        inputProps={{ autoComplete: 'off' }}
+        value={filename}
+        placeholder={placeholder}
         onChange={handleChange}
         variant='standard'
         onBlur={() => {
           setProps((val) => {
             const temp = { ...val }
             temp.readOnly = true
-            delete temp.endAdornment
+            // delete temp.endAdornment
             return temp
           })
         }}
@@ -159,7 +181,6 @@ const InputFilename = ({ file, index }) => {
           setProps((val) => {
             const temp = { ...val }
             temp.readOnly = false
-            temp.endAdornment = <CloseCustomButton inputRef={inputRef} setFiles={setFiles} index={index} />
             return temp
           })
         }}
@@ -167,17 +188,12 @@ const InputFilename = ({ file, index }) => {
     </>
   )
 }
-const CloseCustomButton = (props) => {
+const CloseCustomButton = ({ setFilename }) => {
   return (
     <InputAdornment position='end'>
       <IconButton
         size='small' onClick={() => {
-          props.inputRef.current.value = ''
-          props.setFiles((val) => {
-            const temp = [...val]
-            delete temp[props.index].newName
-            return temp
-          })
+          setFilename('')
         }}
       >
         <Close />
@@ -185,9 +201,9 @@ const CloseCustomButton = (props) => {
     </InputAdornment>
   )
 }
-const InputFile = ({ files, converter, loading, requestState }) => {
+const InputFile = ({ files, converter, loading, requestState, inputRef }) => {
   const [data, setData] = files
-  const fileInputRef = useRef(null)
+  const fileInputRef = inputRef
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
   const handleClick = (event) => {
@@ -203,7 +219,10 @@ const InputFile = ({ files, converter, loading, requestState }) => {
   }
   const handleChange = (e) => {
     const InputFiles = Array.from(e.target.files)
-    const temp = [...data, ...InputFiles]
+    if (data.length > 0 && data.find(item => InputFiles.find(item2 => item2.lastModified === item.lastModified && item2.size === item.size && item2.name === item.name))) {
+      return alert('File already exists')
+    }
+    const temp = [...InputFiles, ...data]
     if (temp.filter(item => !item.fileconverted).length > 5) {
       setData([...temp.filter(item => item.fileconverted), ...temp.filter(item => !item.fileconverted).slice(0, 5)])
       return alert('max 5 file at same time')
@@ -212,6 +231,7 @@ const InputFile = ({ files, converter, loading, requestState }) => {
       setData(temp.filter(item => getSizeNumber(item.size) < 5))
       return alert('file size must not be greater than 5MB')
     }
+    inputRef.current.value = ''
     setData(temp)
   }
   const handleClear = () => {
@@ -223,11 +243,19 @@ const InputFile = ({ files, converter, loading, requestState }) => {
   const handleClearConverted = () => {
     if (window.confirm('Are you sure to clear all converted files?')) {
       setData(data.filter(item => !item.fileconverted))
+      fileInputRef.current.value = ''
     }
   }
   const handleClearNoConverted = () => {
     if (window.confirm('Are you sure to clear all no converted files?')) {
       setData(data.filter(item => item.fileconverted))
+      fileInputRef.current.value = ''
+    }
+  }
+  const handleClearErrors = () => {
+    if (window.confirm('Are you sure to clear all files with errors?')) {
+      setData(data.filter(item => !item.error))
+      fileInputRef.current.value = ''
     }
   }
   const handleConvert = () => {
@@ -237,8 +265,8 @@ const InputFile = ({ files, converter, loading, requestState }) => {
   useEffect(() => {
     if (requestStateEnum.done === requestState) {
       if (('Notification' in window) && Notification.permission === 'granted') {
-        const notification = new Notification('All files converted', {
-          body: 'Your files have been converted',
+        const notification = new Notification('File convertion finished', {
+          body: `Your files have been converted${data.every(item => item.downloable) ? '' : ', some file may have an error'}`,
           tag: 'convertion',
           timestamp: Date.now()
         })
@@ -251,7 +279,7 @@ const InputFile = ({ files, converter, loading, requestState }) => {
         }, 5000)
       }
     }
-  }, [requestState])
+  }, [data, requestState])
   return (
     <Box width='100%'>
       <Stack mx='auto' my={1} width='fit-content' direction='row' gap={1} flexWrap='wrap' justifyContent='space-around'>
@@ -292,18 +320,24 @@ const InputFile = ({ files, converter, loading, requestState }) => {
                 </ListItemIcon>
                 Clear no converted
               </MenuItem>
+              <MenuItem onClick={handleClearErrors} disabled={!data.some(item => item.error)}>
+                <ListItemIcon>
+                  <ErrorOutline />
+                </ListItemIcon>
+                Clear with errors
+              </MenuItem>
             </Menu>
           </Button>
         </ButtonGroup>
         <Box>
-          <input accept='image/png,image/jpg,image/jpeg' type='file' multiple hidden id='input-file' onChange={handleChange} ref={fileInputRef} />
+          <input type='file' accept='image/*' multiple hidden id='input-file' onChange={handleChange} ref={fileInputRef} />
           <Stack component='label' htmlFor='input-file'>
             <Button disableElevation startIcon={<Upload />} disabled={loading} variant='contained' sx={{ textWrap: 'nowrap', width: 'fit-content' }} component='span' role='button'>
               Load Files
             </Button>
           </Stack>
         </Box>
-        <Button disableElevation startIcon={<Compare />} variant='contained' sx={{ width: 'fit-content', textWrap: 'nowrap' }} disabled={(data.filter(item => !item.fileconverted)).length === 0 || loading} onClick={handleConvert}>
+        <Button disableElevation startIcon={<Compare />} variant='contained' sx={{ width: 'fit-content', textWrap: 'nowrap' }} disabled={(data.filter(item => !item.fileconverted && !item.error)).length === 0 || loading} onClick={handleConvert}>
           Convert {(data.filter(item => !item.fileconverted)).length > 1 && 'all'}
         </Button>
       </Stack>
@@ -311,12 +345,12 @@ const InputFile = ({ files, converter, loading, requestState }) => {
     </Box>
   )
 }
-const FileList = ({ files }) => {
+const FileList = ({ files, inputRef }) => {
   const theme = useTheme()
   const [data, setData] = files
   const handleClick = (index) => {
-    data.splice(index, 1)
-    setData([...data])
+    setData(data.filter((_, i) => i !== index))
+    inputRef.current.value = ''
   }
   return (
     <Box height='100%' flex='auto' width='100%' mt={2}>
@@ -352,19 +386,20 @@ InputFile.propTypes = {
   files: PropTypes.array.isRequired,
   converter: PropTypes.func.isRequired,
   loading: PropTypes.bool,
-  requestState: PropTypes.number
+  requestState: PropTypes.number,
+  inputRef: PropTypes.object.isRequired
 }
 FileList.propTypes = {
-  files: PropTypes.array.isRequired
+  files: PropTypes.array.isRequired,
+  inputRef: PropTypes.object.isRequired
 }
 InputFilename.propTypes = {
   file: PropTypes.array.isRequired,
-  index: PropTypes.number.isRequired
+  index: PropTypes.number.isRequired,
+  placeholder: PropTypes.string
 }
 CloseCustomButton.propTypes = {
-  inputRef: PropTypes.object.isRequired,
-  setFiles: PropTypes.func.isRequired,
-  index: PropTypes.number.isRequired
+  setFilename: PropTypes.func.isRequired
 }
 const getSize = (size) => {
   const kb = size / 1024
