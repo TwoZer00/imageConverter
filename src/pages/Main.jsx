@@ -355,7 +355,7 @@ const FileList = ({ files, inputRef }) => {
   }
   return (
     <Box height='100%' flex='auto' width='100%' mt={2}>
-      <Masonry columns={2} spacing={4} sx={{ maxWidth: 'xl', width: '100%', mx: 'auto', p: 1 }}>
+      <Masonry columns={{ lg: 4, xs: 2 }} spacing={4} sx={{ maxWidth: 'xl', width: '100%', mx: 'auto', p: 1 }}>
         {data.map((file, index) => (
           <Box key={index} width='200px' border={1} p={2} boxSizing='content-box' borderRadius={2} borderColor={theme.palette.divider}>
             <Stack direction='row' alignItems='center' mb={1}>
