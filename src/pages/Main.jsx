@@ -219,6 +219,7 @@ const InputFile = ({ files, converter, loading, requestState, inputRef }) => {
   }
   const handleChange = (e) => {
     const InputFiles = Array.from(e.target.files)
+    console.log(InputFiles[0])
     if (data.length > 0 && data.find(item => InputFiles.find(item2 => item2.lastModified === item.lastModified && item2.size === item.size && item2.name === item.name))) {
       return alert('File already exists')
     }
@@ -362,7 +363,9 @@ const FileList = ({ files, inputRef }) => {
             </Stack>
             <Box position='relative'>
               <img src={URL.createObjectURL(file.fileconverted || file)} alt={file.name} style={{ height: 'auto', width: '100%', objectFit: 'contain' }} />
+              {((!file.downloable && !file.error)) && <Chip sx={{ m: 2, position: 'absolute', right: 0, top: 0, zIndex: 1, textTransform: 'uppercase' }} color='primary' size='small' variant='contained' label={file.type} />}
               {file.fileconverted && <Chip sx={{ m: 2, position: 'absolute', right: 0, top: 0, zIndex: 1, textTransform: 'uppercase' }} color='secondary' size='small' variant='contained' label='webp' />}
+              {file.error && <Chip sx={{ m: 2, position: 'absolute', right: 0, top: 0, zIndex: 1, textTransform: 'uppercase' }} color='error' size='small' variant='contained' label='error' />}
             </Box>
             <Tooltip title={`${getSizeNumber(file.size) > 5 ? 'File exceeds 5Mb' : ''}`}>
               <Typography variant='caption' color={`${getSizeNumber(file.size) > 5 ? 'crimson' : 'inherit'}`} textAlign='center' display='block'>{getSize(file.size)}</Typography>
@@ -375,7 +378,7 @@ const FileList = ({ files, inputRef }) => {
                 <Clear />
               </IconButton>
             </Stack>
-            {file.error && <Typography variant='subtitle1' color='crimson' textAlign='center' display='block'>{file.error}</Typography>}
+            {file.error && <Typography variant='caption' color='crimson' textAlign='center' display='block'>{file.error}</Typography>}
           </Box>
         ))}
       </Masonry>
