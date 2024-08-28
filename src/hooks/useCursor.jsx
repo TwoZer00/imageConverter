@@ -1,6 +1,6 @@
 import { useState } from 'react'
-/*
-custom hook get css cursor value and set cursor style
+/**
+ * Set cursor style.
 */
 export const useCursor = () => {
   const [cursor, setCursor] = useState('auto')
