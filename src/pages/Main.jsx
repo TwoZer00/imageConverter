@@ -4,7 +4,8 @@ import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography
 import Masonry from '@mui/lab/Masonry'
 import { ChecklistRtl, Clear, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, ErrorOutline, MoreVert, Rule, Upload } from '@mui/icons-material'
 import { getAnalytics, logEvent } from 'firebase/analytics'
-const API_URL_BASE = (import.meta.env.VITE_API_URL || 'https://image-converter-k56z.onrender.com')
+import { useCursor } from '../hooks/useCursor'
+const API_URL_BASE = (import.meta.env.VITE_API_URL_DEV || 'https://image-converter-k56z.onrender.com')
 const API_URL = `${API_URL_BASE}/api/image/converter`
 const requestStateEnum = {
   none: 0,
@@ -15,11 +16,13 @@ const requestStateEnum = {
 }
 export default function Main () {
   const theme = createTheme()
+  const [, setCursor] = useCursor()
   const [files, setFiles] = useState([])
   const fileInputRef = useRef()
   const [requestState, setRequestState] = useState(requestStateEnum.none)
   const convert = () => {
     setRequestState(requestStateEnum.loading)
+    setCursor('wait')
     const temp = [...files]
     const promises = []
     for (const item of temp) {
@@ -68,6 +71,7 @@ export default function Main () {
       return error
     }).finally(() => {
       clearTimeout(timeOut)
+      setCursor('auto')
       setRequestState(requestStateEnum.done)
       setTimeout(() => {
         setRequestState(requestStateEnum.none)
