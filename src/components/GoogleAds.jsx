@@ -14,7 +14,7 @@ const GoogleAds = () => {
       className='adsbygoogle'
       style={{ display: 'block', height: '150px', width: '100%' }}
       data-ad-client='ca-pub-7731037445831235'
-      data-ad-slot='5542566407'
+      data-ad-slot='5292510382'
     />
   )
 }
