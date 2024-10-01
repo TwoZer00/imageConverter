@@ -4,6 +4,8 @@ import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography
 import Masonry from '@mui/lab/Masonry'
 import { ChecklistRtl, Clear, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, ErrorOutline, MoreVert, Rule, Upload } from '@mui/icons-material'
 import { getAnalytics, logEvent } from 'firebase/analytics'
+import { useCursor } from '../hooks/useCursor'
+import GoogleAds from '../components/GoogleAds'
 const API_URL_BASE = 'https://image-converter-k56z.onrender.com'
 const API_URL = `${API_URL_BASE}/api/image/converter`
 const requestStateEnum = {
