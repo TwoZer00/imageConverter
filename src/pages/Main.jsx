@@ -4,8 +4,7 @@ import { Box, Stack, Button, CssBaseline, ThemeProvider, createTheme, Typography
 import Masonry from '@mui/lab/Masonry'
 import { ChecklistRtl, Clear, Close, CloudDoneOutlined, CloudOffOutlined, CloudSyncOutlined, Compare, Delete, Download, ErrorOutline, MoreVert, Rule, Upload } from '@mui/icons-material'
 import { getAnalytics, logEvent } from 'firebase/analytics'
-import { useCursor } from '../hooks/useCursor'
-const API_URL_BASE = (import.meta.env.VITE_API_URL_DEV || 'https://image-converter-k56z.onrender.com')
+const API_URL_BASE = 'https://image-converter-k56z.onrender.com'
 const API_URL = `${API_URL_BASE}/api/image/converter`
 const requestStateEnum = {
   none: 0,
@@ -99,6 +98,7 @@ export default function Main () {
             <FileList files={[files, setFiles]} inputRef={fileInputRef} />
           </Box>
           <Box component='footer' position='fixed' width='100%' sx={{ bottom: 0, backgroundColor: theme.palette.background.default }}>
+            <GoogleAds />
             <Typography variant='body2' textAlign='center'>
               Made with ❤️ by &copy;
               <Link href='https://twozer00.dev' target='_blank' color='secondary'>
