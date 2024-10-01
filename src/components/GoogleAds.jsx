@@ -11,7 +11,7 @@ const GoogleAds = () => {
 
   return (
     <ins
-      style={{ display: 'block' }}
+      style={{ display: 'block', flex: 1 }}
       data-ad-format='autorelaxed'
       data-ad-client='ca-pub-7731037445831235'
       data-ad-slot='3003945310'
