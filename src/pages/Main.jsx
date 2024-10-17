@@ -100,7 +100,7 @@ export default function Main () {
             <FileList files={[files, setFiles]} inputRef={fileInputRef} />
           </Box>
           <Box component='footer' position='fixed' width='100%' sx={{ bottom: 0, backgroundColor: theme.palette.background.default }}>
-            <Box maxWidth='lg' mx='auto' height='auto' maxHeight='200px' display='flex' justifyContent='center'>
+            <Box maxWidth='lg' mx='auto' display='flex' height='150px' justifyContent='center'>
               <GoogleAds />
             </Box>
             <Typography variant='body2' textAlign='center'>
