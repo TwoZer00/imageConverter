@@ -100,7 +100,9 @@ export default function Main () {
             <FileList files={[files, setFiles]} inputRef={fileInputRef} />
           </Box>
           <Box component='footer' position='fixed' width='100%' sx={{ bottom: 0, backgroundColor: theme.palette.background.default }}>
-            <GoogleAds />
+            <Box maxWidth='lg' mx='auto' height='auto' maxHeight='200px' display='flex' justifyContent='center'>
+              <GoogleAds />
+            </Box>
             <Typography variant='body2' textAlign='center'>
               Made with ❤️ by &copy;
               <Link href='https://twozer00.dev' target='_blank' color='secondary'>
