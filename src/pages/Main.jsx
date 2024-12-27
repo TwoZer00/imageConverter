@@ -22,6 +22,11 @@ export default function Main () {
   const fileInputRef = useRef()
   const [requestState, setRequestState] = useState(requestStateEnum.none)
   const convert = () => {
+    if (!import.meta.env.VITE_ENV) {
+      logEvent(getAnalytics(), 'conversion_start', {
+        files: files.filter((item) => !item.fileconverted || !item.error).length
+      })
+    }
     setRequestState(requestStateEnum.loading)
     setCursor('wait')
     const temp = [...files]
