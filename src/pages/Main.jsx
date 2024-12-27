@@ -104,11 +104,11 @@ export default function Main () {
             </Box>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, flex: 1 }}>
               <Box display='flex' alignItems='center' sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} className='ad-wrapper'>
-                <GoogleAds />
+                <GoogleAds adSlot='1558281832' />
               </Box>
               <FileList files={[files, setFiles]} inputRef={fileInputRef} />
               <Box display='flex' alignItems='center' sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} className='ad-wrapper'>
-                <GoogleAds />
+                <GoogleAds adSlot='5292510382' />
               </Box>
             </Box>
           </Box>
