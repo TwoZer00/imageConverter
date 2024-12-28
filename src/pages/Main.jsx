@@ -103,11 +103,11 @@ export default function Main () {
               <InputFile files={[files, setFiles]} inputRef={fileInputRef} converter={convert} loading={requestState === requestStateEnum.loading || requestState === requestStateEnum.stillLoading} requestState={requestState} />
             </Box>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, flex: 1 }}>
-              <Box display='flex' alignItems='center' height={{ xs: '100px', lg: '80px' }} sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} className='ad-wrapper'>
+              <Box display='flex' alignItems='center' height={{ xs: '100px', lg: '100%' }} sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} className='ad-wrapper'>
                 <GoogleAds adSlot='1558281832' />
               </Box>
               <FileList files={[files, setFiles]} inputRef={fileInputRef} />
-              <Box display='flex' alignItems='center' height={{ xs: '100px', lg: '80px' }} sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} className='ad-wrapper'>
+              <Box display='flex' alignItems='center' height={{ xs: '100px', lg: '100%' }} sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} className='ad-wrapper'>
                 <GoogleAds adSlot='5292510382' />
               </Box>
             </Box>
