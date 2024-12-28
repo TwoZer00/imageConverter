@@ -98,16 +98,16 @@ export default function Main () {
             <Typography variant='h1' fontSize={32} fontWeight={400} textTransform='uppercase'>Image converter</Typography>
             <Typography variant='subtitle1' fontSize={12}>Convert images to webp</Typography>
           </Stack>
-          <Box component='main' flex={1} display='flex' flexDirection='column'>
-            <Box sx={{ position: 'sticky', backgroundColor: `${alpha(theme.palette.background.default, 0.25)}`, width: '100%', display: 'flex', flex: 0, alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0, mb: 3 }}>
+          <Box component='main' display='flex' flexDirection='column' flex={1}>
+            <Box sx={{ position: 'sticky', backgroundColor: `${alpha(theme.palette.background.default, 0.25)}`, width: '100%', display: 'flex', flex: 0, alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0 }}>
               <InputFile files={[files, setFiles]} inputRef={fileInputRef} converter={convert} loading={requestState === requestStateEnum.loading || requestState === requestStateEnum.stillLoading} requestState={requestState} />
             </Box>
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, flex: 1 }}>
-              <Box display='flex' alignItems='center' sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} className='ad-wrapper'>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, flex: 1 }}>
+              <Box display='flex' alignItems='center' height={{ xs: '100px', lg: '80px' }} sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} className='ad-wrapper'>
                 <GoogleAds adSlot='1558281832' />
               </Box>
               <FileList files={[files, setFiles]} inputRef={fileInputRef} />
-              <Box display='flex' alignItems='center' sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} className='ad-wrapper'>
+              <Box display='flex' alignItems='center' height={{ xs: '100px', lg: '80px' }} sx={{ maxWidth: { md: '100%', lg: '300px' }, flex: { md: '0.25', sm: '1' } }} className='ad-wrapper'>
                 <GoogleAds adSlot='5292510382' />
               </Box>
             </Box>
@@ -373,7 +373,7 @@ const FileList = ({ files, inputRef }) => {
   }
   return (
     <>
-      <Masonry columns={{ lg: 4, xs: 2 }} spacing={4} sx={{ maxWidth: 'xl', width: '100%', mx: 'auto', p: 1, flex: 1 }}>
+      <Masonry columns={{ lg: 4, xs: 2 }} spacing={4} sx={{ maxWidth: 'lg', width: '100%', mx: 'auto', p: 1, flex: 1 }}>
         {data.map((file, index) => (
           <Box key={index} width='200px' border={1} p={2} boxSizing='content-box' borderRadius={2} borderColor={theme.palette.divider}>
             <Stack direction='row' alignItems='center' mb={1}>
