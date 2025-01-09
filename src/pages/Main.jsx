@@ -96,7 +96,7 @@ export default function Main () {
         <Stack maxWidth='100dvw' height='100dvh' sx={{ display: 'flex', flexDirection: 'column' }}>
           <Stack component='header' direction='column' alignItems='center' mt={1}>
             <Typography variant='h1' fontSize={32} fontWeight={400} textTransform='uppercase'>Image converter</Typography>
-            <Typography variant='subtitle1' fontSize={12}>Convert images to webp</Typography>
+            <Typography variant='h2' fontSize={12} sx={{ ':first-letter': { textTransform: 'uppercase' }, textTransform: 'lowercase' }}>Convert Images to WebP Format Quickly and Easily</Typography>
           </Stack>
           <Box component='main' display='flex' flexDirection='column' flex={1}>
             <Box sx={{ position: 'sticky', backgroundColor: `${alpha(theme.palette.background.default, 0.25)}`, width: '100%', display: 'flex', flex: 0, alignItems: 'center', justifyContent: 'center', zIndex: 2, left: 0, top: 0, flexDirection: 'column', backdropFilter: 'blur(5px)', border: 1, borderColor: theme.palette.divider, borderLeft: 0, borderRight: 0, borderTop: 0 }}>
@@ -113,12 +113,15 @@ export default function Main () {
             </Box>
           </Box>
           <Box component='footer' sx={{ backgroundColor: theme.palette.background.default }}>
-            <Typography variant='body2' textAlign='center'>
+            <Typography variant='body2' textAlign='center' maxWidth='70%' mx='auto'>
               Made with ❤️ by &copy;
               <Link href='https://twozer00.dev' target='_blank' color='secondary'>
                 <strong>TwoZer00</strong>
               </Link>
               {` ${new Date().getFullYear()}`}
+              <br />
+              This WebP image converter is perfect for developers, designers, and anyone looking to optimize their multimedia content.
+              Convert images from JPEG, PNG, or GIF to WebP for free and without limits. Improve your website's performance with faster, lightweight images.
             </Typography>
           </Box>
           <Snackbar
@@ -300,7 +303,7 @@ const InputFile = ({ files, converter, loading, requestState, inputRef }) => {
     }
   }, [data, requestState])
   return (
-    <Box width='100%'>
+    <Box width='100%' display='flex' flexDirection='column'>
       <Stack mx='auto' my={1} width='fit-content' direction='row' gap={1} flexWrap='wrap' justifyContent='space-around'>
         <ButtonGroup variant='contained' color='error' disableElevation disabled={loading}>
           <Button startIcon={<Delete />} disabled={data.length === 0 || loading} color='error' onClick={handleClear}>
@@ -360,6 +363,7 @@ const InputFile = ({ files, converter, loading, requestState, inputRef }) => {
           Convert {(data.filter(item => !item.fileconverted)).length > 1 && 'all'}
         </Button>
       </Stack>
+      <Typography sx={{ alignSelf: 'center' }} variant='caption'>Click "Load Files" to upload your images and convert them to WebP format.</Typography>
       <LinearProgress sx={{ width: '100%', visibility: `${loading ? 'visible' : 'hidden'}` }} />
     </Box>
   )
@@ -373,9 +377,9 @@ const FileList = ({ files, inputRef }) => {
   }
   return (
     <>
-      <Masonry columns={{ lg: 4, xs: 2 }} spacing={4} sx={{ maxWidth: 'lg', width: '100%', mx: 'auto', p: 1, flex: 1 }}>
+      <Masonry columns={{ lg: 4, xs: 2 }} spacing={2} sx={{ maxWidth: 'lg', width: '100%', mx: 'auto', p: 1, flex: 1 }}>
         {data.map((file, index) => (
-          <Box key={index} width='200px' border={1} p={2} boxSizing='content-box' borderRadius={2} borderColor={theme.palette.divider}>
+          <Box key={index} width='200px' border={1} p={1} boxSizing='content-box' borderRadius={2} borderColor={theme.palette.divider}>
             <Stack direction='row' alignItems='center' mb={1}>
               <InputFilename file={[file, setData]} index={index} placeholder={file.name || 'no filename'} />
             </Stack>
@@ -389,12 +393,16 @@ const FileList = ({ files, inputRef }) => {
               <Typography variant='caption' color={`${getSizeNumber(file.size) > 5 ? 'crimson' : 'inherit'}`} textAlign='center' display='block'>{getSize(file.size)}</Typography>
             </Tooltip>
             <Stack direction='row' justifyContent='flex-end' alignItems='center'>
-              <IconButton disabled={!file.downloable} component='a' href={file.fileconverted && URL.createObjectURL(file.fileconverted)} download={file.newName?.replace(' ', '-') || true}>
-                <Download />
-              </IconButton>
-              <IconButton onClick={() => handleClick(index)}>
-                <Clear />
-              </IconButton>
+              <Tooltip title='Download the converted image.'>
+                <IconButton size='small' disabled={!file.downloable} component='a' href={file.fileconverted && URL.createObjectURL(file.fileconverted)} download={file.newName?.replace(' ', '-') || true}>
+                  <Download />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title='Remove this file.'>
+                <IconButton size='small' onClick={() => handleClick(index)}>
+                  <Clear />
+                </IconButton>
+              </Tooltip>
             </Stack>
             {file.error && <Typography variant='caption' color='crimson' textAlign='center' display='block'>{file.error}</Typography>}
           </Box>
