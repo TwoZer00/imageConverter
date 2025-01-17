@@ -113,15 +113,17 @@ export default function Main () {
             </Box>
           </Box>
           <Box component='footer' sx={{ backgroundColor: theme.palette.background.default }}>
-            <Typography variant='body2' textAlign='center' maxWidth='70%' mx='auto'>
+            <Typography variant='body2' textAlign='center' maxWidth='90%' mx='auto'>
               Made with ❤️ by &copy;
               <Link href='https://twozer00.dev' target='_blank' color='secondary'>
                 <strong>TwoZer00</strong>
               </Link>
               {` ${new Date().getFullYear()}`}
               <br />
-              This WebP image converter is perfect for developers, designers, and anyone looking to optimize their multimedia content.
-              Convert images from JPEG, PNG, or GIF to WebP for free and without limits. Improve your website's performance with faster, lightweight images.
+              <Typography variant='caption' color='inherit' sx={{ height: { xs: '3ch', md: 'auto' }, overflow: { xs: 'scroll', md: 'visible' }, display: 'block' }}>
+                This WebP image converter is perfect for developers, designers, and anyone looking to optimize their multimedia content.
+                Convert images from JPEG, PNG, or GIF to WebP for free and without limits. Improve your website's performance with faster, lightweight images.
+              </Typography>
             </Typography>
           </Box>
           <Snackbar
@@ -363,7 +365,7 @@ const InputFile = ({ files, converter, loading, requestState, inputRef }) => {
           Convert {(data.filter(item => !item.fileconverted)).length > 1 && 'all'}
         </Button>
       </Stack>
-      <Typography sx={{ alignSelf: 'center' }} variant='caption'>Click "Load Files" to upload your images and convert them to WebP format.</Typography>
+      <Typography sx={{ alignSelf: 'center', textAlign: 'center', mx: 1 }} variant='caption'>Click "Load Files" to upload your images and convert them to WebP format.</Typography>
       <LinearProgress sx={{ width: '100%', visibility: `${loading ? 'visible' : 'hidden'}` }} />
     </Box>
   )
