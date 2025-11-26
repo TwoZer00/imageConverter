@@ -7,7 +7,14 @@ import Init from './pages/Init'
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Init />
+    element: <Init />,
+    loader: async () => {
+      //wake service with emtpy http call
+      const status = await fetch('https://image-converter-k56z.onrender.com/api/ping',{
+        method: 'GET',
+      })
+      return null;
+    }
   }
 ])
 
