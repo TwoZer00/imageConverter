@@ -6,7 +6,7 @@ import { ChecklistRtl, Clear, Close, CloudDoneOutlined, CloudOffOutlined, CloudS
 import { getAnalytics, logEvent } from 'firebase/analytics'
 import { useCursor } from '../hooks/useCursor'
 import GoogleAds from '../components/GoogleAds'
-const API_URL_BASE = 'https://image-converter-k56z.onrender.com'
+export const API_URL_BASE = 'https://image-converter-k56z.onrender.com'
 const API_URL = `${API_URL_BASE}/api/image/converter`
 const requestStateEnum = {
   none: 0,
